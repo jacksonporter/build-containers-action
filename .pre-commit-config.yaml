@@ -1,0 +1,83 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        exclude: ^dist/
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-xml
+      - id: check-yaml
+      - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-aws-credentials
+        args:
+          - --allow-missing-credentials
+      - id: detect-private-key
+      - id: double-quote-string-fixer
+      - id: end-of-file-fixer
+        exclude: ^(badges/|dist/)
+      - id: file-contents-sorter
+      - id: fix-byte-order-marker
+      - id: fix-encoding-pragma
+      - id: forbid-new-submodules
+      - id: forbid-submodules
+      - id: mixed-line-ending
+      - id: name-tests-test
+      - id: no-commit-to-branch
+      - id: requirements-txt-fixer
+      - id: sort-simple-yaml
+      - id: trailing-whitespace
+        exclude: ^dist/
+
+  - repo: local
+    hooks:
+      - id: fmt
+        name: fmt
+        entry: mise run 'format'
+        files: \.(ts|js)$
+        language: system
+        pass_filenames: false
+
+      - id: lint
+        name: lint
+        entry: mise run 'lint'
+        files: .*
+        language: system
+        pass_filenames: false
+
+      - id: licensed-cache
+        name: licensed-cache
+        entry: mise run 'licensed-cache'
+        files: ^package-lock\.json$
+        language: system
+        pass_filenames: false
+
+      - id: test
+        name: test
+        entry: mise run 'test'
+        files: .*
+        language: system
+        pass_filenames: false
+
+      - id: coverage
+        name: coverage
+        entry: mise run 'coverage'
+        files: .*
+        language: system
+        pass_filenames: false
+
+      - id: package
+        name: package
+        entry: mise run 'package'
+        files: .*
+        language: system
+        pass_filenames: false
