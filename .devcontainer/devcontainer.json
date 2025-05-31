@@ -1,7 +1,10 @@
 {
-  "name": "GitHub Actions (TypeScript)",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-  "postCreateCommand": "npm install",
+  "name": "GitHub Actions Development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
   "customizations": {
     "codespaces": {
       "openFiles": ["README.md"]
@@ -9,17 +12,42 @@
     "vscode": {
       "extensions": [
         "bierner.markdown-preview-github-styles",
+        "github.copilot-chat",
         "davidanson.vscode-markdownlint",
         "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "equinusocio.vsc-material-theme",
+        "equinusocio.vsc-material-theme-icons",
         "esbenp.prettier-vscode",
+        "exiasr.hadolint",
+        "foxundermoon.shell-format",
         "github.copilot",
-        "github.copilot-chat",
+        "github.remotehub",
         "github.vscode-github-actions",
         "github.vscode-pull-request-github",
-        "me-dutour-mathieu.vscode-github-actions",
+        "gruntfuggly.todo-tree",
+        "hverlin.mise-vscode",
+        "jock.svg",
+        "ms-python.python",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "ms-vscode-remote.remote-wsl",
+        "ms-vscode.azure-repos",
+        "ms-vscode.live-server",
+        "ms-vscode.makefile-tools",
+        "ms-vscode.powershell",
+        "ms-vscode.remote-explorer",
+        "ms-vscode.remote-repositories",
+        "ms-vsliveshare.vsliveshare",
+        "orta.vscode-jest",
+        "pkief.material-icon-theme",
+        "redhat.vscode-xml",
         "redhat.vscode-yaml",
-        "rvest.vs-code-prettier-eslint",
-        "yzhang.markdown-all-in-one"
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
+        "timonwong.shellcheck"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -32,10 +60,11 @@
     }
   },
   "remoteEnv": {
-    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
-  },
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-contrib/features/prettier:1": {}
+    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
+    "MISE_ENV": "dev-container",
+    "LANGUAGE": "en_US.UTF-8",
+    "LC_CTYPE": "en_US.UTF-8",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
   }
 }

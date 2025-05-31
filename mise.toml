@@ -1,0 +1,58 @@
+[tools]
+node = "20"
+python = "latest"
+ruby = "latest"
+
+[env]
+_.python.venv = { path = ".venv", create = true } # create the venv if it doesn't exist
+
+[hooks]
+enter = "mise exec -- node scripts/hooks/enter.js"
+
+[tasks.clean]
+description = "Cleans up downloaded dependencies and setups"
+run = "mise exec -- node scripts/tasks/clean.js"
+
+[tasks.install]
+description = "Install project dependencies"
+run = "mise exec -- node scripts/tasks/installProjectDependencies.js"
+
+[tasks.licensed-cache]
+description = "Generate licenses"
+run = "mise exec -- licensed cache"
+
+[tasks.format]
+description = "Format the project"
+run = "mise exec -- npx prettier --write ."
+
+[tasks.format-check]
+description = "Check the project is formatted"
+run = "mise exec -- npx prettier --check ."
+
+[tasks.test]
+description = "Test the project"
+run = "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 mise exec -- npx jest"
+
+[tasks.coverage]
+description = "Generate coverage report"
+run = "mise exec -- npx make-coverage-badge --output-path ./badges/coverage.svg"
+
+[tasks.ci-test]
+description = "Run CI tests"
+run = "mise exec -- NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest"
+
+[tasks.local-action]
+description = "Run the local action"
+run = "mise exec -- npx @github/local-action . src/main.ts .env"
+
+[tasks.lint]
+description = "Lint the project"
+run = "mise exec -- node scripts/tasks/lint.js"
+
+[tasks.package]
+description = "Package the project"
+run = "mise exec -- npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
+
+[tasks.package-watch]
+description = "Package the project in watch mode"
+run = "mise exec -- npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript --watch"
