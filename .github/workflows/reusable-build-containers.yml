@@ -76,7 +76,8 @@ jobs:
       - id: build-containers-action-build
         uses: jacksonporter/build-containers-action@jp/v1dev
         with:
-          config: ${{ matrix }}
+          config: |
+            ${{ toJson(matrix) }}
           config-format: 'jobInclude'
           config-file-format: 'json'
           mode: 'build'
