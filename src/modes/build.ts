@@ -116,9 +116,6 @@ export function buildContainer(
   target: string | null,
   platform_slug: string | null
 ) {
-  // const skipPush =
-  //   core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
-
   core.info(`Building container with tag: ${tag}`)
 
   const command = ['docker', 'build', '-f', containerfilePath, '-t', tag]
@@ -154,6 +151,46 @@ export function buildContainer(
   }
 
   return tag
+}
+
+export function addOtherTags(builtTag: string, fullTags: string[]) {
+  core.info(`Adding other tags: ${JSON.stringify(fullTags, null, 2)}`)
+  for (const tag of fullTags) {
+    if (tag !== builtTag) {
+      core.info(`Adding tag: ${tag}`)
+      try {
+        execSync(`docker tag ${builtTag} ${tag}`, {
+          stdio: 'inherit'
+        })
+      } catch (error) {
+        core.error(`Error adding tag: ${tag}`)
+        throw error
+      }
+    }
+  }
+}
+
+export function pushTags(tags: string[]) {
+  core.info(`Pushing tags: ${JSON.stringify(tags, null, 2)}`)
+  const skipPush =
+    core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
+
+  if (skipPush) {
+    core.info('Skipping push')
+    return
+  }
+
+  for (const tag of tags) {
+    core.info(`Pushing tag: ${tag}`)
+    try {
+      execSync(`docker push ${tag}`, {
+        stdio: 'inherit'
+      })
+    } catch (error) {
+      core.error(`Error pushing tag: ${tag}`)
+      throw error
+    }
+  }
 }
 
 export async function buildMode(): Promise<ModeReturn> {
@@ -206,6 +243,9 @@ export async function buildMode(): Promise<ModeReturn> {
     jobIncludeConfig.target || null,
     jobIncludeConfig.platform_slug || null
   )
+
+  addOtherTags(builtTag, fullTags)
+  pushTags(fullTags)
 
   core.info(`Build complete: ${builtTag}`)
 

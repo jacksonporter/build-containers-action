@@ -8724,8 +8724,6 @@ function generateBuildArgs(buildArgs) {
     return buildArgsArray;
 }
 function buildContainer(containerfilePath, contextPath, buildArgs, tag, target, platform_slug) {
-    // const skipPush =
-    //   core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
     coreExports.info(`Building container with tag: ${tag}`);
     const command = ['docker', 'build', '-f', containerfilePath, '-t', tag];
     for (const [key, value] of Object.entries(buildArgs)) {
@@ -8753,6 +8751,43 @@ function buildContainer(containerfilePath, contextPath, buildArgs, tag, target, 
         throw error;
     }
     return tag;
+}
+function addOtherTags(builtTag, fullTags) {
+    coreExports.info(`Adding other tags: ${JSON.stringify(fullTags, null, 2)}`);
+    for (const tag of fullTags) {
+        if (tag !== builtTag) {
+            coreExports.info(`Adding tag: ${tag}`);
+            try {
+                execSync(`docker tag ${builtTag} ${tag}`, {
+                    stdio: 'inherit'
+                });
+            }
+            catch (error) {
+                coreExports.error(`Error adding tag: ${tag}`);
+                throw error;
+            }
+        }
+    }
+}
+function pushTags(tags) {
+    coreExports.info(`Pushing tags: ${JSON.stringify(tags, null, 2)}`);
+    const skipPush = coreExports.getInput('skip-push') || process.env.SKIP_PUSH ? true : false;
+    if (skipPush) {
+        coreExports.info('Skipping push');
+        return;
+    }
+    for (const tag of tags) {
+        coreExports.info(`Pushing tag: ${tag}`);
+        try {
+            execSync(`docker push ${tag}`, {
+                stdio: 'inherit'
+            });
+        }
+        catch (error) {
+            coreExports.error(`Error pushing tag: ${tag}`);
+            throw error;
+        }
+    }
 }
 async function buildMode() {
     const jobIncludeConfig = getJobIncludeConfig();
@@ -8782,6 +8817,8 @@ async function buildMode() {
         : 'Dockerfile', jobIncludeConfig.contextPath
         ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
         : '.', buildArgs, fullTags[0], jobIncludeConfig.target || null, jobIncludeConfig.platform_slug || null);
+    addOtherTags(builtTag, fullTags);
+    pushTags(fullTags);
     coreExports.info(`Build complete: ${builtTag}`);
     return {
         buildOutput: {
