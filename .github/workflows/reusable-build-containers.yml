@@ -1,0 +1,61 @@
+name: Build Containers
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        type: string
+        description: The config file contents
+        default: ''
+      config-file:
+        type: string
+        description: The path to the config file
+        default: 'containers-build.toml'
+      config-format:
+        type: string
+        description: The format of the config file
+        default: 'toml'
+      default-runner-label:
+        type: string
+        description: The default runner label to use for the build
+        default: '["ubuntu-latest"]'
+
+jobs:
+  generate-matrix:
+    runs-on: ${{ fromJson(inputs.default-runner-label) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - id: build-container-action-matrix-generation
+        uses: jacksonporter/build-container-action@jp/v1dev
+        with:
+          config: ${{ inputs.config }}
+          config-file: ${{ inputs.config-file }}
+          config-format: ${{ inputs.config-format }}
+    outputs:
+      windowsMatrix:
+        ${{ steps.build-container-action-matrix-generation.outputs.windowsMatrix}}
+      linuxMatrix:
+        ${{ steps.build-container-action-matrix-generation.outputs.linuxMatrix}}
+
+  build-linux:
+    needs:
+      - generate-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.linuxMatrix) }}
+    runs-on: ${{ fromJson(matrix.ci.defaultRunnerLabels) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: test
+        run: echo "${{ toJson(matrix) }}"
+
+  build-windows:
+    needs:
+      - generate-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.windowsMatrix) }}
+    runs-on: ${{ fromJson(matrix.ci.defaultRunnerLabels) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
