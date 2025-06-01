@@ -5,7 +5,8 @@ import { StandardRepository } from './types/standard.js'
 export async function getRepositoryClass(
   type: string,
   repositoryConfig: RepositoryConfig,
-  templateValues: { [key: string]: string }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  templateValues: { [key: string]: any }
 ): Promise<StandardRepository> {
   // check if there is a custom repository class for this type named <type>.js in the repositories/types folder
   try {

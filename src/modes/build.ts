@@ -1,5 +1,8 @@
+import { getRepositoryClass } from '../repositories/respository.js'
+
 import { getJobIncludeConfig } from '../input.js'
 import { ModeReturn } from '../mode.js'
+import { getGitProjectRoot } from '../git.js'
 
 export interface BuildOutput {
   temp: string
@@ -7,6 +10,21 @@ export interface BuildOutput {
 
 export async function buildMode(): Promise<ModeReturn> {
   const jobIncludeConfig = getJobIncludeConfig()
+
+  const templateValues = {
+    env: process.env,
+    GIT_PROJECT_ROOT: getGitProjectRoot()
+  }
+
+  // Login to repositories
+  for (const repository of Object.values(jobIncludeConfig.repositories || {})) {
+    const repositoryClass = await getRepositoryClass(
+      repository.type,
+      repository,
+      templateValues
+    )
+    await repositoryClass.login()
+  }
 
   return {
     buildOutput: {

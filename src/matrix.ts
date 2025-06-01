@@ -1,21 +1,12 @@
 import * as core from '@actions/core'
 import {
-  BuildArgConfig,
-  CIConfig,
   FinalizedContainerConfig,
   FinalizedLinuxPlatformConfig,
-  FinalizedPlatformConfig
+  FinalizedPlatformConfig,
 } from './config.js'
 
-export interface JobInclude {
+export interface JobInclude extends FinalizedPlatformConfig {
   job: string
-  containerfilePath: string
-  contextPath: string
-  arch: string | null
-  buildArgs: {
-    [key: string]: BuildArgConfig
-  }
-  ci: CIConfig
 }
 
 export interface LinuxJobInclude extends JobInclude {
