@@ -18,6 +18,10 @@ inputs:
     required: false
     default: 'containers-build.toml'
   config-format:
+    description: The format of the configuration
+    required: false
+    default: 'rawConfig'
+  config-file-format:
     description: The format of the configuration file
     required: false
     default: 'toml'
@@ -36,6 +40,10 @@ outputs:
     description: The linux matrix for the build
   windowsMatrix:
     description: The windows matrix for the build
+  build-output-json:
+    description: The build output for the build in JSON format
+  build-output-json-path:
+    description: The path to the build output JSON file
 
 runs:
   using: node20

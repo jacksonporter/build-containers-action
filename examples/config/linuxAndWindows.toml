@@ -23,8 +23,8 @@ ci.useBuildkit = false
 type = "standard"
 registry = "ghcr.io"
 repository = "jacksonporter/bootstrap-olm"
-usernameTemplate = "{{env.GITHUB_ACTOR}}"
-passwordTemplate = "{{env.GITHUB_TOKEN}}"
+username = "{{env.GITHUB_ACTOR}}"
+password = "{{env.GITHUB_TOKEN}}"
 
 # ##############################################################################
 # Debug container

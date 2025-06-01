@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { getRawConfig } from '../input.js'
 import { getConfigFromJSON } from '../config.js'
-import { ModeReturn } from '../modeReturnTypes.js'
+import { ModeReturn } from '../mode.js'
 import {
   buildLinuxMatrixFromFinalizedContainerConfig,
   buildWindowsMatrixFromFinalizedContainerConfig

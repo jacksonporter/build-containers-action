@@ -7,11 +7,10 @@ import {
   FinalizedPlatformConfig
 } from './config.js'
 
-export interface LinuxJobInclude {
+export interface JobInclude {
   job: string
   containerfilePath: string
   contextPath: string
-  platform_slug: string
   arch: string | null
   buildArgs: {
     [key: string]: BuildArgConfig
@@ -19,15 +18,17 @@ export interface LinuxJobInclude {
   ci: CIConfig
 }
 
-export interface LinuxMatrix {
-  job: Array<string>
-  include: Array<LinuxJobInclude>
+export interface LinuxJobInclude extends JobInclude {
+  platform_slug: string
 }
 
 export function buildLinuxMatrixFromFinalizedContainerConfig(
   config: FinalizedContainerConfig
-): LinuxMatrix {
-  const matrix: LinuxMatrix = { job: [], include: [] as LinuxJobInclude[] }
+): FinalizedMatrixConfig {
+  const matrix: FinalizedMatrixConfig = {
+    job: [],
+    include: [] as Array<JobInclude>
+  }
 
   for (const [i, j] of Object.entries(config)) {
     core.debug(`Building matrix for container: ${i}`)
@@ -45,33 +46,25 @@ export function buildLinuxMatrixFromFinalizedContainerConfig(
       matrix.include.push({
         ...(l as FinalizedLinuxPlatformConfig),
         job: finalizedJobKey
-      } as LinuxJobInclude)
+      } as JobInclude)
     }
   }
 
   return matrix
 }
 
-export interface WindowsJobInclude {
-  job: string
-  containerfilePath: string
-  contextPath: string
-  arch: string | null
-  buildArgs: {
-    [key: string]: BuildArgConfig
-  }
-  ci: CIConfig
-}
-
-export interface WindowsMatrix {
+export interface FinalizedMatrixConfig {
   job: Array<string>
-  include: Array<WindowsJobInclude>
+  include: Array<JobInclude>
 }
 
 export function buildWindowsMatrixFromFinalizedContainerConfig(
   config: FinalizedContainerConfig
-): WindowsMatrix {
-  const matrix: WindowsMatrix = { job: [], include: [] as WindowsJobInclude[] }
+): FinalizedMatrixConfig {
+  const matrix: FinalizedMatrixConfig = {
+    job: [],
+    include: [] as Array<JobInclude>
+  }
 
   for (const [i, j] of Object.entries(config)) {
     core.debug(`Building matrix for container: ${i}`)
@@ -89,7 +82,7 @@ export function buildWindowsMatrixFromFinalizedContainerConfig(
       matrix.include.push({
         ...(l as FinalizedPlatformConfig),
         job: finalizedJobKey
-      } as WindowsJobInclude)
+      } as JobInclude)
     }
   }
 

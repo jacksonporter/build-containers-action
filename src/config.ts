@@ -280,8 +280,8 @@ export interface RepositoryConfig {
   type: string
   registry: string
   repository: string
-  usernameTemplate?: string | null
-  passwordTemplate?: string | null
+  username?: string | null
+  password?: string | null
 }
 
 export function validateRepositoryConfig(repositoryConfig: RepositoryConfig) {
@@ -300,20 +300,16 @@ export function validateRepositoryConfig(repositoryConfig: RepositoryConfig) {
     throw new Error('repositoryConfig.repository is required')
   }
 
-  // check that usernameTemplate is a string, and if its empty, set to null
-  if (!repositoryConfig.usernameTemplate) {
-    core.warning(
-      'repositoryConfig.usernameTemplate is not set, setting to null'
-    )
-    repositoryConfig.usernameTemplate = null
+  // check that username is a string, and if its empty, set to null
+  if (!repositoryConfig.username) {
+    core.warning('repositoryConfig.username is not set, setting to null')
+    repositoryConfig.username = null
   }
 
-  // check that passwordTemplate is a string, and if its empty, set to null
-  if (!repositoryConfig.passwordTemplate) {
-    core.warning(
-      'repositoryConfig.passwordTemplate is not set, setting to null'
-    )
-    repositoryConfig.passwordTemplate = null
+  // check that password is a string, and if its empty, set to null
+  if (!repositoryConfig.password) {
+    core.warning('repositoryConfig.password is not set, setting to null')
+    repositoryConfig.password = null
   }
 
   return repositoryConfig

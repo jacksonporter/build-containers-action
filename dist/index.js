@@ -1,8 +1,9 @@
 import require$$0 from 'os';
 import require$$0$1 from 'crypto';
-import * as require$$1 from 'fs';
-import require$$1__default from 'fs';
-import require$$1$5 from 'path';
+import * as fs from 'fs';
+import fs__default from 'fs';
+import * as require$$1 from 'path';
+import require$$1__default from 'path';
 import require$$2 from 'http';
 import require$$3 from 'https';
 import require$$0$4 from 'net';
@@ -223,7 +224,7 @@ function requireFileCommand () {
 	// We use any as a valid input type
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const crypto = __importStar(require$$0$1);
-	const fs = __importStar(require$$1__default);
+	const fs = __importStar(fs__default);
 	const os = __importStar(require$$0);
 	const utils_1 = requireUtils$1();
 	function issueFileCommand(command, message) {
@@ -25201,7 +25202,7 @@ function requireSummary () {
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
 		const os_1 = require$$0;
-		const fs_1 = require$$1__default;
+		const fs_1 = fs__default;
 		const { access, appendFile, writeFile } = fs_1.promises;
 		exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
 		exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary';
@@ -25507,7 +25508,7 @@ function requirePathUtils () {
 	};
 	Object.defineProperty(pathUtils, "__esModule", { value: true });
 	pathUtils.toPlatformPath = pathUtils.toWin32Path = pathUtils.toPosixPath = void 0;
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1__default);
 	/**
 	 * toPosixPath converts the given path to the posix form. On Windows, \\ will be
 	 * replaced with /.
@@ -25593,8 +25594,8 @@ function requireIoUtil () {
 		var _a;
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
-		const fs = __importStar(require$$1__default);
-		const path = __importStar(require$$1$5);
+		const fs = __importStar(fs__default);
+		const path = __importStar(require$$1__default);
 		_a = fs.promises
 		// export const {open} = 'fs'
 		, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
@@ -25784,7 +25785,7 @@ function requireIo () {
 	Object.defineProperty(io, "__esModule", { value: true });
 	io.findInPath = io.which = io.mkdirP = io.rmRF = io.mv = io.cp = void 0;
 	const assert_1 = require$$0$3;
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1__default);
 	const ioUtil = __importStar(requireIoUtil());
 	/**
 	 * Copies a file or folder.
@@ -26092,7 +26093,7 @@ function requireToolrunner () {
 	const os = __importStar(require$$0);
 	const events = __importStar(require$$4);
 	const child = __importStar(require$$2$2);
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1__default);
 	const io = __importStar(requireIo());
 	const ioUtil = __importStar(requireIoUtil());
 	const timers_1 = require$$6$1;
@@ -26936,7 +26937,7 @@ function requireCore () {
 		const file_command_1 = requireFileCommand();
 		const utils_1 = requireUtils$1();
 		const os = __importStar(require$$0);
-		const path = __importStar(require$$1$5);
+		const path = __importStar(require$$1__default);
 		const oidc_utils_1 = requireOidcUtils();
 		/**
 		 * The code to exit an action
@@ -35024,50 +35025,41 @@ function parse(src, reviver, options) {
     return doc.toJS(Object.assign({ reviver: _reviver }, options));
 }
 
-var InputMode;
-(function (InputMode) {
-    InputMode["GENERATE_MATRIX"] = "generate-matrix";
-    InputMode["BUILD"] = "build";
-    InputMode["COMBINE_MANIFEST"] = "combine-manifest";
-    InputMode["PUSH"] = "push";
-})(InputMode || (InputMode = {}));
 var InputConfigFormat;
 (function (InputConfigFormat) {
     InputConfigFormat["TOML"] = "toml";
     InputConfigFormat["JSON"] = "json";
     InputConfigFormat["YAML"] = "yaml";
 })(InputConfigFormat || (InputConfigFormat = {}));
-function getInputMode() {
-    const mode = coreExports.getInput('mode');
-    if (!Object.values(InputMode).includes(mode)) {
-        throw new Error(`Invalid input mode: ${mode}`);
-    }
-    return mode;
-}
 function getRawConfig() {
     coreExports.info('Getting raw config...');
     let config = coreExports.getInput('config');
     const configFilePath = coreExports.getInput('config-file');
     const configFormat = coreExports.getInput('config-format');
+    const configFileFormat = coreExports.getInput('config-file-format');
     coreExports.debug(`Config format: ${configFormat}`);
+    coreExports.debug(`Config file format: ${configFileFormat}`);
     coreExports.debug(`Config file: ${configFilePath}`);
     coreExports.debug(`Config: ${config}`);
+    if (configFormat !== 'rawConfig') {
+        throw new Error(`Invalid input config format for generating matrix: ${configFormat}`);
+    }
     // check config file format
-    if (!Object.values(InputConfigFormat).includes(configFormat)) {
-        throw new Error(`Invalid input config format: ${configFormat}`);
+    if (!Object.values(InputConfigFormat).includes(configFileFormat)) {
+        throw new Error(`Invalid input config file format: ${configFileFormat}`);
     }
     if (!config && configFilePath) {
         // check if config file exists
-        if (!require$$1.existsSync(configFilePath)) {
+        if (!fs.existsSync(configFilePath)) {
             throw new Error(`Config file does not exist: ${configFilePath}`);
         }
         coreExports.debug(`Config file exists: ${configFilePath}`);
         // read config file
         coreExports.info(`Reading config file: ${configFilePath}`);
-        config = require$$1.readFileSync(configFilePath, 'utf8');
+        config = fs.readFileSync(configFilePath, 'utf8');
     }
     // based on config format, parse it
-    switch (configFormat) {
+    switch (configFileFormat) {
         case InputConfigFormat.TOML:
             coreExports.debug('Parsing TOML config');
             return parse$1(config);
@@ -35078,8 +35070,59 @@ function getRawConfig() {
             coreExports.debug('Parsing YAML config');
             return parse(config);
         default:
-            throw new Error(`Unsupported config format: ${configFormat}`);
+            throw new Error(`Unsupported config file format: ${configFileFormat}`);
     }
+}
+function getJobIncludeConfig() {
+    coreExports.info('Getting job include...');
+    let config = coreExports.getInput('config');
+    const configFilePath = coreExports.getInput('config-file');
+    const configFormat = coreExports.getInput('config-format');
+    const configFileFormat = coreExports.getInput('config-file-format');
+    coreExports.debug(`Config format: ${configFormat}`);
+    coreExports.debug(`Config file format: ${configFileFormat}`);
+    coreExports.debug(`Config file: ${configFilePath}`);
+    coreExports.debug(`Config: ${config}`);
+    if (configFormat !== 'jobInclude') {
+        throw new Error(`Invalid input config format for job include: ${configFormat}`);
+    }
+    // check config file format
+    if (!Object.values(InputConfigFormat).includes(configFileFormat)) {
+        throw new Error(`Invalid input config file format: ${configFileFormat}`);
+    }
+    if (!config && configFilePath) {
+        // check if config file exists
+        if (!fs.existsSync(configFilePath)) {
+            throw new Error(`Config file does not exist: ${configFilePath}`);
+        }
+        coreExports.debug(`Config file exists: ${configFilePath}`);
+        // read config file
+        coreExports.info(`Reading config file: ${configFilePath}`);
+        config = fs.readFileSync(configFilePath, 'utf8');
+    }
+    // based on config format, parse it
+    switch (configFileFormat) {
+        case InputConfigFormat.TOML:
+            coreExports.debug('Parsing TOML config');
+            return parse$1(config);
+        case InputConfigFormat.JSON:
+            coreExports.debug('Parsing JSON config');
+            return JSON.parse(config);
+        case InputConfigFormat.YAML:
+            coreExports.debug('Parsing YAML config');
+            return parse(config);
+        default:
+            throw new Error(`Unsupported config file format: ${configFileFormat}`);
+    }
+}
+
+async function buildMode() {
+    const jobIncludeConfig = getJobIncludeConfig();
+    return {
+        buildOutput: {
+            temp: JSON.stringify(jobIncludeConfig, null, 2)
+        }
+    };
 }
 
 function validateCIConfig(ciConfig, ciDefaults = {}) {
@@ -35285,15 +35328,15 @@ function validateRepositoryConfig(repositoryConfig) {
     if (!repositoryConfig.repository) {
         throw new Error('repositoryConfig.repository is required');
     }
-    // check that usernameTemplate is a string, and if its empty, set to null
-    if (!repositoryConfig.usernameTemplate) {
-        coreExports.warning('repositoryConfig.usernameTemplate is not set, setting to null');
-        repositoryConfig.usernameTemplate = null;
+    // check that username is a string, and if its empty, set to null
+    if (!repositoryConfig.username) {
+        coreExports.warning('repositoryConfig.username is not set, setting to null');
+        repositoryConfig.username = null;
     }
-    // check that passwordTemplate is a string, and if its empty, set to null
-    if (!repositoryConfig.passwordTemplate) {
-        coreExports.warning('repositoryConfig.passwordTemplate is not set, setting to null');
-        repositoryConfig.passwordTemplate = null;
+    // check that password is a string, and if its empty, set to null
+    if (!repositoryConfig.password) {
+        coreExports.warning('repositoryConfig.password is not set, setting to null');
+        repositoryConfig.password = null;
     }
     return repositoryConfig;
 }
@@ -35452,7 +35495,10 @@ async function getConfigFromJSON(config) {
 }
 
 function buildLinuxMatrixFromFinalizedContainerConfig(config) {
-    const matrix = { job: [], include: [] };
+    const matrix = {
+        job: [],
+        include: []
+    };
     for (const [i, j] of Object.entries(config)) {
         coreExports.debug(`Building matrix for container: ${i}`);
         for (const [k, l] of Object.entries(j.linuxPlatforms)) {
@@ -35470,7 +35516,10 @@ function buildLinuxMatrixFromFinalizedContainerConfig(config) {
     return matrix;
 }
 function buildWindowsMatrixFromFinalizedContainerConfig(config) {
-    const matrix = { job: [], include: [] };
+    const matrix = {
+        job: [],
+        include: []
+    };
     for (const [i, j] of Object.entries(config)) {
         coreExports.debug(`Building matrix for container: ${i}`);
         for (const [k, l] of Object.entries(j.windowsPlatforms)) {
@@ -35503,6 +35552,25 @@ async function generateMatrixMode() {
     };
 }
 
+var InputMode;
+(function (InputMode) {
+    InputMode["GENERATE_MATRIX"] = "generate-matrix";
+    InputMode["BUILD"] = "build";
+    InputMode["COMBINE_MANIFEST"] = "combine-manifest";
+    InputMode["PUSH"] = "push";
+})(InputMode || (InputMode = {}));
+async function startMode() {
+    const mode = coreExports.getInput('mode');
+    switch (mode) {
+        case InputMode.GENERATE_MATRIX:
+            return await generateMatrixMode();
+        case InputMode.BUILD:
+            return await buildMode();
+        default:
+            throw new Error(`Invalid input mode: ${mode}`);
+    }
+}
+
 /**
  * The main function for the action.
  *
@@ -35510,24 +35578,7 @@ async function generateMatrixMode() {
  */
 async function run() {
     try {
-        // const ms: string = core.getInput('milliseconds')
-        // // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        // core.debug(`Waiting ${ms} milliseconds ...`)
-        // // Log the current timestamp, wait, then log the new timestamp
-        // core.debug(new Date().toTimeString())
-        // await wait(parseInt(ms, 10))
-        // core.debug(new Date().toTimeString())
-        // // Set outputs for other workflow steps to use
-        // core.setOutput('time', new Date().toTimeString())
-        const mode = getInputMode();
-        let modeReturn;
-        switch (mode) {
-            case InputMode.GENERATE_MATRIX:
-                modeReturn = await generateMatrixMode();
-                break;
-            default:
-                throw new Error(`Invalid input mode: ${mode}`);
-        }
+        const modeReturn = await startMode();
         if (modeReturn.finalizedContainerConfig) {
             coreExports.setOutput('finalizedContainerConfig', JSON.stringify(modeReturn.finalizedContainerConfig));
             coreExports.info(`Finalized container config: ${JSON.stringify(modeReturn.finalizedContainerConfig, null, 2)}`);
@@ -35539,6 +35590,14 @@ async function run() {
         if (modeReturn.windowsMatrix) {
             coreExports.setOutput('windowsMatrix', JSON.stringify(modeReturn.windowsMatrix));
             coreExports.info(`Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`);
+        }
+        if (modeReturn.buildOutput) {
+            coreExports.setOutput('build-output-json', JSON.stringify(modeReturn.buildOutput));
+            coreExports.info(`Build output: ${JSON.stringify(modeReturn.buildOutput, null, 2)}`);
+            // save the build output to a file
+            const filePath = require$$1.join(process.env.GITHUB_WORKSPACE || '', 'buildOutput.json');
+            fs.writeFileSync(filePath, JSON.stringify(modeReturn.buildOutput, null, 2));
+            coreExports.setOutput('build-output-json-path', filePath);
         }
     }
     catch (error) {

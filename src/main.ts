@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import { InputMode, getInputMode } from './input.js'
-import { generateMatrixMode } from './modes/generateMatrix.js'
-import { ModeReturn } from './modeReturnTypes.js'
+import { startMode } from './mode.js'
+import * as fs from 'fs'
+import * as path from 'path'
 
 /**
  * The main function for the action.
@@ -10,29 +10,7 @@ import { ModeReturn } from './modeReturnTypes.js'
  */
 export async function run(): Promise<void> {
   try {
-    // const ms: string = core.getInput('milliseconds')
-
-    // // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    // core.debug(`Waiting ${ms} milliseconds ...`)
-
-    // // Log the current timestamp, wait, then log the new timestamp
-    // core.debug(new Date().toTimeString())
-    // await wait(parseInt(ms, 10))
-    // core.debug(new Date().toTimeString())
-
-    // // Set outputs for other workflow steps to use
-    // core.setOutput('time', new Date().toTimeString())
-
-    const mode = getInputMode()
-    let modeReturn: ModeReturn
-
-    switch (mode) {
-      case InputMode.GENERATE_MATRIX:
-        modeReturn = await generateMatrixMode()
-        break
-      default:
-        throw new Error(`Invalid input mode: ${mode}`)
-    }
+    const modeReturn = await startMode()
 
     if (modeReturn.finalizedContainerConfig) {
       core.setOutput(
@@ -60,6 +38,28 @@ export async function run(): Promise<void> {
       core.info(
         `Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`
       )
+    }
+
+    if (modeReturn.buildOutput) {
+      core.setOutput(
+        'build-output-json',
+        JSON.stringify(modeReturn.buildOutput)
+      )
+      core.info(
+        `Build output: ${JSON.stringify(modeReturn.buildOutput, null, 2)}`
+      )
+
+      // save the build output to a file
+      const filePath = path.join(
+        process.env.GITHUB_WORKSPACE || '',
+        'buildOutput.json'
+      )
+      fs.writeFileSync(
+        filePath,
+        JSON.stringify(modeReturn.buildOutput, null, 2)
+      )
+
+      core.setOutput('build-output-json-path', filePath)
     }
   } catch (error) {
     // Fail the workflow run if an error occurs
