@@ -101,7 +101,9 @@ export function buildContainer(
   containerfilePath: string,
   contextPath: string,
   buildArgs: Record<string, string>,
-  tag: string
+  tag: string,
+  target: string | null,
+  platform_slug: string | null
 ) {
   // const skipPush =
   //   core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
@@ -113,6 +115,16 @@ export function buildContainer(
   for (const [key, value] of Object.entries(buildArgs)) {
     command.push('--build-arg')
     command.push(`${key}=${value}`)
+  }
+
+  if (target) {
+    command.push('--target')
+    command.push(target)
+  }
+
+  if (platform_slug) {
+    command.push('--platform')
+    command.push(platform_slug)
   }
 
   command.push(contextPath)
@@ -138,7 +150,7 @@ export async function buildMode(): Promise<ModeReturn> {
 
   const templateValues = {
     env: process.env,
-    GIT_PROJECT_ROOT: getGitProjectRoot(),
+    GIT_PROJECT_ROOT: await getGitProjectRoot(),
     CONTAINER_NAME: jobIncludeConfig.containerName,
     ARCH: jobIncludeConfig.arch || process.arch
   }
@@ -179,7 +191,9 @@ export async function buildMode(): Promise<ModeReturn> {
       ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
       : '.',
     buildArgs,
-    fullTags[0]
+    fullTags[0],
+    jobIncludeConfig.target || null,
+    jobIncludeConfig.platform_slug || null
   )
 
   core.info(`Build complete: ${builtTag}`)

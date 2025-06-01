@@ -8711,7 +8711,7 @@ function generateBuildArgs(buildArgs) {
     }
     return buildArgsArray;
 }
-function buildContainer(containerfilePath, contextPath, buildArgs, tag) {
+function buildContainer(containerfilePath, contextPath, buildArgs, tag, target, platform_slug) {
     // const skipPush =
     //   core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
     coreExports.info(`Building container with tag: ${tag}`);
@@ -8719,6 +8719,14 @@ function buildContainer(containerfilePath, contextPath, buildArgs, tag) {
     for (const [key, value] of Object.entries(buildArgs)) {
         command.push('--build-arg');
         command.push(`${key}=${value}`);
+    }
+    if (target) {
+        command.push('--target');
+        command.push(target);
+    }
+    if (platform_slug) {
+        command.push('--platform');
+        command.push(platform_slug);
     }
     command.push(contextPath);
     const strCommand = command.join(' ');
@@ -8738,7 +8746,7 @@ async function buildMode() {
     const jobIncludeConfig = getJobIncludeConfig();
     const templateValues = {
         env: process.env,
-        GIT_PROJECT_ROOT: getGitProjectRoot(),
+        GIT_PROJECT_ROOT: await getGitProjectRoot(),
         CONTAINER_NAME: jobIncludeConfig.containerName,
         ARCH: jobIncludeConfig.arch || process.arch
     };
@@ -8761,7 +8769,7 @@ async function buildMode() {
         ? Handlebars.compile(jobIncludeConfig.containerfilePath)(templateValues)
         : 'Dockerfile', jobIncludeConfig.contextPath
         ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
-        : '.', buildArgs, fullTags[0]);
+        : '.', buildArgs, fullTags[0], jobIncludeConfig.target || null, jobIncludeConfig.platform_slug || null);
     coreExports.info(`Build complete: ${builtTag}`);
     return {
         buildOutput: {
