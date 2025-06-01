@@ -113,6 +113,17 @@ jobs:
           config-file-format: 'json'
           mode: 'build'
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.ci.useBuildkit == true
+        with:
+          name: build-containers-action-build-output-${{ matrix.job }}
+          path:
+            ${{
+            steps.build-containers-action-build-buildkit.outputs.build-output-json-path
+            }}
+          retention-days: 1
+
       - id: build-containers-action-build
         if: matrix.ci.useBuildkit == false
         uses: jacksonporter/build-containers-action@jp/v1dev
@@ -127,6 +138,7 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        if: matrix.ci.useBuildkit == false
         with:
           name: build-containers-action-build-output-${{ matrix.job }}
           path:

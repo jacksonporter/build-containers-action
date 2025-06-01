@@ -8895,6 +8895,7 @@ async function run() {
             // save the build output to a file
             const filePath = require$$1.join(process.env.GITHUB_WORKSPACE || '', 'buildOutput.json');
             fs.writeFileSync(filePath, JSON.stringify(modeReturn.buildOutput, null, 2));
+            coreExports.info(`Wrote file: ${filePath}, setting output 'build-output-json-path' as this file path`);
             coreExports.setOutput('build-output-json-path', filePath);
         }
     }

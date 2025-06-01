@@ -58,6 +58,9 @@ export async function run(): Promise<void> {
         filePath,
         JSON.stringify(modeReturn.buildOutput, null, 2)
       )
+      core.info(
+        `Wrote file: ${filePath}, setting output 'build-output-json-path' as this file path`
+      )
 
       core.setOutput('build-output-json-path', filePath)
     }
