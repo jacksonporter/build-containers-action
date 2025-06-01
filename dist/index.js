@@ -8691,10 +8691,11 @@ function generateBuildArgs(buildArgs) {
                         continue;
                     }
                     try {
-                        execSync(value.cmd, {
+                        setValue = execSync(value.cmd, {
                             stdio: 'inherit'
-                        });
-                        setValue = value.cmd.trim();
+                        })
+                            .toString()
+                            .trim();
                     }
                     catch (error) {
                         coreExports.error(`Error executing command: ${error}`);

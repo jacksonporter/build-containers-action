@@ -76,10 +76,11 @@ export function generateBuildArgs(buildArgs: Record<string, BuildArgConfig>) {
           }
 
           try {
-            execSync(value.cmd, {
+            setValue = execSync(value.cmd, {
               stdio: 'inherit'
             })
-            setValue = value.cmd.trim()
+              .toString()
+              .trim()
           } catch (error) {
             core.error(`Error executing command: ${error}`)
           }
