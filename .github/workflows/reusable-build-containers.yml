@@ -55,6 +55,7 @@ jobs:
       - generate-matrix
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.linuxMatrix) }}
+      fail-fast: false
     runs-on: ${{ matrix.ci.defaultRunnerLabels }}
     permissions:
       contents: read
@@ -111,6 +112,7 @@ jobs:
       - generate-matrix
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.windowsMatrix) }}
+      fail-fast: false
     runs-on: ${{ matrix.ci.defaultRunnerLabels }}
     permissions:
       contents: read
