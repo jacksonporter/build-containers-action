@@ -8680,9 +8680,10 @@ function generateBuildArgs(buildArgs) {
             ];
         }
         for (const precedence of value.orderPrecedence) {
+            coreExports.info(`Checking value for precedence type: ${precedence}`);
             switch (precedence) {
                 case BuildArgPrecedence.DEFAULT:
-                    setValue = value.default;
+                    setValue = value.default || null;
                     break;
                 case BuildArgPrecedence.CMD:
                     if (!value.cmd) {

@@ -64,9 +64,10 @@ export function generateBuildArgs(buildArgs: Record<string, BuildArgConfig>) {
     }
 
     for (const precedence of value.orderPrecedence) {
+      core.info(`Checking value for precedence type: ${precedence}`)
       switch (precedence) {
         case BuildArgPrecedence.DEFAULT:
-          setValue = value.default
+          setValue = value.default || null
           break
         case BuildArgPrecedence.CMD:
           if (!value.cmd) {
