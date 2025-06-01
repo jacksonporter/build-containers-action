@@ -8757,7 +8757,11 @@ async function buildMode() {
         }
     }
     const buildArgs = generateBuildArgs(jobIncludeConfig.buildArgs || {});
-    const builtTag = buildContainer(jobIncludeConfig.containerfilePath || 'Dockerfile', jobIncludeConfig.contextPath || '.', buildArgs, fullTags[0]);
+    const builtTag = buildContainer(jobIncludeConfig.containerfilePath
+        ? Handlebars.compile(jobIncludeConfig.containerfilePath)(templateValues)
+        : 'Dockerfile', jobIncludeConfig.contextPath
+        ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
+        : '.', buildArgs, fullTags[0]);
     coreExports.info(`Build complete: ${builtTag}`);
     return {
         buildOutput: {

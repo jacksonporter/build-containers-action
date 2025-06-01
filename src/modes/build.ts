@@ -172,8 +172,12 @@ export async function buildMode(): Promise<ModeReturn> {
   const buildArgs = generateBuildArgs(jobIncludeConfig.buildArgs || {})
 
   const builtTag = buildContainer(
-    jobIncludeConfig.containerfilePath || 'Dockerfile',
-    jobIncludeConfig.contextPath || '.',
+    jobIncludeConfig.containerfilePath
+      ? Handlebars.compile(jobIncludeConfig.containerfilePath)(templateValues)
+      : 'Dockerfile',
+    jobIncludeConfig.contextPath
+      ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
+      : '.',
     buildArgs,
     fullTags[0]
   )
