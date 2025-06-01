@@ -8493,10 +8493,19 @@ class StandardRepository {
     }
     async login() {
         const repositoryConfig = this.getRepositoryConfig();
+        if (repositoryConfig.password) {
+            coreExports.setSecret(repositoryConfig.password);
+        }
         coreExports.info(`Logging in to ${repositoryConfig.registry}`);
-        execSync(`docker login ${repositoryConfig.registry} -u ${repositoryConfig.username} -p ${repositoryConfig.password}`, {
-            stdio: 'inherit'
-        });
+        try {
+            execSync(`docker login ${repositoryConfig.registry} -u ${repositoryConfig.username} -p ${repositoryConfig.password}`, {
+                stdio: 'inherit'
+            });
+        }
+        catch (error) {
+            coreExports.error(`Failed to login to ${repositoryConfig.registry}`);
+            throw error;
+        }
     }
 }
 

@@ -29,13 +29,22 @@ export abstract class StandardRepository {
   public async login(): Promise<void> {
     const repositoryConfig = this.getRepositoryConfig()
 
+    if (repositoryConfig.password) {
+      core.setSecret(repositoryConfig.password)
+    }
+
     core.info(`Logging in to ${repositoryConfig.registry}`)
-    execSync(
-      `docker login ${repositoryConfig.registry} -u ${repositoryConfig.username} -p ${repositoryConfig.password}`,
-      {
-        stdio: 'inherit'
-      }
-    )
+    try {
+      execSync(
+        `docker login ${repositoryConfig.registry} -u ${repositoryConfig.username} -p ${repositoryConfig.password}`,
+        {
+          stdio: 'inherit'
+        }
+      )
+    } catch (error) {
+      core.error(`Failed to login to ${repositoryConfig.registry}`)
+      throw error
+    }
   }
 }
 
