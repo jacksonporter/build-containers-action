@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import {
   FinalizedContainerConfig,
   FinalizedLinuxPlatformConfig,
-  FinalizedPlatformConfig,
+  FinalizedPlatformConfig
 } from './config.js'
 
 export interface JobInclude extends FinalizedPlatformConfig {

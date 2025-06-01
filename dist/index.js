@@ -27,10 +27,15 @@ import require$$1$4 from 'url';
 import require$$3$1 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
-import require$$2$2 from 'child_process';
+import require$$2$2, { execSync } from 'child_process';
 import require$$6$1 from 'timers';
+import require$$1$5 from 'fs/promises';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
 
 var core = {};
 
@@ -261,7 +266,7 @@ function requireFileCommand () {
 
 var oidcUtils = {};
 
-var lib = {};
+var lib$1 = {};
 
 var proxy = {};
 
@@ -24349,13 +24354,13 @@ function requireUndici () {
 	return undici;
 }
 
-var hasRequiredLib;
+var hasRequiredLib$1;
 
-function requireLib () {
-	if (hasRequiredLib) return lib;
-	hasRequiredLib = 1;
+function requireLib$1 () {
+	if (hasRequiredLib$1) return lib$1;
+	hasRequiredLib$1 = 1;
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	var __createBinding = (lib && lib.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+	var __createBinding = (lib$1 && lib$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    var desc = Object.getOwnPropertyDescriptor(m, k);
 	    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -24366,19 +24371,19 @@ function requireLib () {
 	    if (k2 === undefined) k2 = k;
 	    o[k2] = m[k];
 	}));
-	var __setModuleDefault = (lib && lib.__setModuleDefault) || (Object.create ? (function(o, v) {
+	var __setModuleDefault = (lib$1 && lib$1.__setModuleDefault) || (Object.create ? (function(o, v) {
 	    Object.defineProperty(o, "default", { enumerable: true, value: v });
 	}) : function(o, v) {
 	    o["default"] = v;
 	});
-	var __importStar = (lib && lib.__importStar) || function (mod) {
+	var __importStar = (lib$1 && lib$1.__importStar) || function (mod) {
 	    if (mod && mod.__esModule) return mod;
 	    var result = {};
 	    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
 	    __setModuleDefault(result, mod);
 	    return result;
 	};
-	var __awaiter = (lib && lib.__awaiter) || function (thisArg, _arguments, P, generator) {
+	var __awaiter = (lib$1 && lib$1.__awaiter) || function (thisArg, _arguments, P, generator) {
 	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -24387,8 +24392,8 @@ function requireLib () {
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	Object.defineProperty(lib, "__esModule", { value: true });
-	lib.HttpClient = lib.isHttps = lib.HttpClientResponse = lib.HttpClientError = lib.getProxyUrl = lib.MediaTypes = lib.Headers = lib.HttpCodes = void 0;
+	Object.defineProperty(lib$1, "__esModule", { value: true });
+	lib$1.HttpClient = lib$1.isHttps = lib$1.HttpClientResponse = lib$1.HttpClientError = lib$1.getProxyUrl = lib$1.MediaTypes = lib$1.Headers = lib$1.HttpCodes = void 0;
 	const http = __importStar(require$$2);
 	const https = __importStar(require$$3);
 	const pm = __importStar(requireProxy());
@@ -24423,16 +24428,16 @@ function requireLib () {
 	    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
 	    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
 	    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
-	})(HttpCodes || (lib.HttpCodes = HttpCodes = {}));
+	})(HttpCodes || (lib$1.HttpCodes = HttpCodes = {}));
 	var Headers;
 	(function (Headers) {
 	    Headers["Accept"] = "accept";
 	    Headers["ContentType"] = "content-type";
-	})(Headers || (lib.Headers = Headers = {}));
+	})(Headers || (lib$1.Headers = Headers = {}));
 	var MediaTypes;
 	(function (MediaTypes) {
 	    MediaTypes["ApplicationJson"] = "application/json";
-	})(MediaTypes || (lib.MediaTypes = MediaTypes = {}));
+	})(MediaTypes || (lib$1.MediaTypes = MediaTypes = {}));
 	/**
 	 * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
 	 * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
@@ -24441,7 +24446,7 @@ function requireLib () {
 	    const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
 	    return proxyUrl ? proxyUrl.href : '';
 	}
-	lib.getProxyUrl = getProxyUrl;
+	lib$1.getProxyUrl = getProxyUrl;
 	const HttpRedirectCodes = [
 	    HttpCodes.MovedPermanently,
 	    HttpCodes.ResourceMoved,
@@ -24465,7 +24470,7 @@ function requireLib () {
 	        Object.setPrototypeOf(this, HttpClientError.prototype);
 	    }
 	}
-	lib.HttpClientError = HttpClientError;
+	lib$1.HttpClientError = HttpClientError;
 	class HttpClientResponse {
 	    constructor(message) {
 	        this.message = message;
@@ -24497,12 +24502,12 @@ function requireLib () {
 	        });
 	    }
 	}
-	lib.HttpClientResponse = HttpClientResponse;
+	lib$1.HttpClientResponse = HttpClientResponse;
 	function isHttps(requestUrl) {
 	    const parsedUrl = new URL(requestUrl);
 	    return parsedUrl.protocol === 'https:';
 	}
-	lib.isHttps = isHttps;
+	lib$1.isHttps = isHttps;
 	class HttpClient {
 	    constructor(userAgent, handlers, requestOptions) {
 	        this._ignoreSslError = false;
@@ -25002,10 +25007,10 @@ function requireLib () {
 	        });
 	    }
 	}
-	lib.HttpClient = HttpClient;
+	lib$1.HttpClient = HttpClient;
 	const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
 	
-	return lib;
+	return lib$1;
 }
 
 var auth = {};
@@ -25114,7 +25119,7 @@ function requireOidcUtils () {
 	};
 	Object.defineProperty(oidcUtils, "__esModule", { value: true });
 	oidcUtils.OidcClient = void 0;
-	const http_client_1 = requireLib();
+	const http_client_1 = requireLib$1();
 	const auth_1 = requireAuth();
 	const core_1 = requireCore();
 	class OidcClient {
@@ -27247,6 +27252,21 @@ function requireCore () {
 }
 
 var coreExports = requireCore();
+
+async function getRepositoryClass(type, repositoryConfig, 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+templateValues) {
+    // check if there is a custom repository class for this type named <type>.js in the repositories/types folder
+    try {
+        coreExports.debug(`Attempting to import repository class for type: ${type}`);
+        const repositoryClass = await import(`./types/${type}.js`);
+        coreExports.debug(`Repository class: ${repositoryClass.default}`);
+        return new repositoryClass.default(repositoryConfig, templateValues);
+    }
+    catch (error) {
+        throw new Error(`Unknown or could not import repository class for type: ${type} - ${error}`);
+    }
+}
 
 /*!
  * Copyright (c) Squirrel Chat et al., All rights reserved.
@@ -35116,8 +35136,381 @@ function getJobIncludeConfig() {
     }
 }
 
+var cjs = {};
+
+var posix = {};
+
+var hasRequiredPosix;
+
+function requirePosix () {
+	if (hasRequiredPosix) return posix;
+	hasRequiredPosix = 1;
+	/**
+	 * This is the Posix implementation of isexe, which uses the file
+	 * mode and uid/gid values.
+	 *
+	 * @module
+	 */
+	Object.defineProperty(posix, "__esModule", { value: true });
+	posix.sync = posix.isexe = void 0;
+	const fs_1 = fs__default;
+	const promises_1 = require$$1$5;
+	/**
+	 * Determine whether a path is executable according to the mode and
+	 * current (or specified) user and group IDs.
+	 */
+	const isexe = async (path, options = {}) => {
+	    const { ignoreErrors = false } = options;
+	    try {
+	        return checkStat(await (0, promises_1.stat)(path), options);
+	    }
+	    catch (e) {
+	        const er = e;
+	        if (ignoreErrors || er.code === 'EACCES')
+	            return false;
+	        throw er;
+	    }
+	};
+	posix.isexe = isexe;
+	/**
+	 * Synchronously determine whether a path is executable according to
+	 * the mode and current (or specified) user and group IDs.
+	 */
+	const sync = (path, options = {}) => {
+	    const { ignoreErrors = false } = options;
+	    try {
+	        return checkStat((0, fs_1.statSync)(path), options);
+	    }
+	    catch (e) {
+	        const er = e;
+	        if (ignoreErrors || er.code === 'EACCES')
+	            return false;
+	        throw er;
+	    }
+	};
+	posix.sync = sync;
+	const checkStat = (stat, options) => stat.isFile() && checkMode(stat, options);
+	const checkMode = (stat, options) => {
+	    const myUid = options.uid ?? process.getuid?.();
+	    const myGroups = options.groups ?? process.getgroups?.() ?? [];
+	    const myGid = options.gid ?? process.getgid?.() ?? myGroups[0];
+	    if (myUid === undefined || myGid === undefined) {
+	        throw new Error('cannot get uid or gid');
+	    }
+	    const groups = new Set([myGid, ...myGroups]);
+	    const mod = stat.mode;
+	    const uid = stat.uid;
+	    const gid = stat.gid;
+	    const u = parseInt('100', 8);
+	    const g = parseInt('010', 8);
+	    const o = parseInt('001', 8);
+	    const ug = u | g;
+	    return !!(mod & o ||
+	        (mod & g && groups.has(gid)) ||
+	        (mod & u && uid === myUid) ||
+	        (mod & ug && myUid === 0));
+	};
+	
+	return posix;
+}
+
+var win32 = {};
+
+var hasRequiredWin32;
+
+function requireWin32 () {
+	if (hasRequiredWin32) return win32;
+	hasRequiredWin32 = 1;
+	/**
+	 * This is the Windows implementation of isexe, which uses the file
+	 * extension and PATHEXT setting.
+	 *
+	 * @module
+	 */
+	Object.defineProperty(win32, "__esModule", { value: true });
+	win32.sync = win32.isexe = void 0;
+	const fs_1 = fs__default;
+	const promises_1 = require$$1$5;
+	/**
+	 * Determine whether a path is executable based on the file extension
+	 * and PATHEXT environment variable (or specified pathExt option)
+	 */
+	const isexe = async (path, options = {}) => {
+	    const { ignoreErrors = false } = options;
+	    try {
+	        return checkStat(await (0, promises_1.stat)(path), path, options);
+	    }
+	    catch (e) {
+	        const er = e;
+	        if (ignoreErrors || er.code === 'EACCES')
+	            return false;
+	        throw er;
+	    }
+	};
+	win32.isexe = isexe;
+	/**
+	 * Synchronously determine whether a path is executable based on the file
+	 * extension and PATHEXT environment variable (or specified pathExt option)
+	 */
+	const sync = (path, options = {}) => {
+	    const { ignoreErrors = false } = options;
+	    try {
+	        return checkStat((0, fs_1.statSync)(path), path, options);
+	    }
+	    catch (e) {
+	        const er = e;
+	        if (ignoreErrors || er.code === 'EACCES')
+	            return false;
+	        throw er;
+	    }
+	};
+	win32.sync = sync;
+	const checkPathExt = (path, options) => {
+	    const { pathExt = process.env.PATHEXT || '' } = options;
+	    const peSplit = pathExt.split(';');
+	    if (peSplit.indexOf('') !== -1) {
+	        return true;
+	    }
+	    for (let i = 0; i < peSplit.length; i++) {
+	        const p = peSplit[i].toLowerCase();
+	        const ext = path.substring(path.length - p.length).toLowerCase();
+	        if (p && ext === p) {
+	            return true;
+	        }
+	    }
+	    return false;
+	};
+	const checkStat = (stat, path, options) => stat.isFile() && checkPathExt(path, options);
+	
+	return win32;
+}
+
+var options = {};
+
+var hasRequiredOptions;
+
+function requireOptions () {
+	if (hasRequiredOptions) return options;
+	hasRequiredOptions = 1;
+	Object.defineProperty(options, "__esModule", { value: true });
+	
+	return options;
+}
+
+var hasRequiredCjs;
+
+function requireCjs () {
+	if (hasRequiredCjs) return cjs;
+	hasRequiredCjs = 1;
+	(function (exports) {
+		var __createBinding = (cjs && cjs.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		    if (k2 === undefined) k2 = k;
+		    var desc = Object.getOwnPropertyDescriptor(m, k);
+		    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+		      desc = { enumerable: true, get: function() { return m[k]; } };
+		    }
+		    Object.defineProperty(o, k2, desc);
+		}) : (function(o, m, k, k2) {
+		    if (k2 === undefined) k2 = k;
+		    o[k2] = m[k];
+		}));
+		var __setModuleDefault = (cjs && cjs.__setModuleDefault) || (Object.create ? (function(o, v) {
+		    Object.defineProperty(o, "default", { enumerable: true, value: v });
+		}) : function(o, v) {
+		    o["default"] = v;
+		});
+		var __importStar = (cjs && cjs.__importStar) || function (mod) {
+		    if (mod && mod.__esModule) return mod;
+		    var result = {};
+		    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+		    __setModuleDefault(result, mod);
+		    return result;
+		};
+		var __exportStar = (cjs && cjs.__exportStar) || function(m, exports) {
+		    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+		};
+		Object.defineProperty(exports, "__esModule", { value: true });
+		exports.sync = exports.isexe = exports.posix = exports.win32 = void 0;
+		const posix = __importStar(requirePosix());
+		exports.posix = posix;
+		const win32 = __importStar(requireWin32());
+		exports.win32 = win32;
+		__exportStar(requireOptions(), exports);
+		const platform = process.env._ISEXE_TEST_PLATFORM_ || process.platform;
+		const impl = platform === 'win32' ? win32 : posix;
+		/**
+		 * Determine whether a path is executable on the current platform.
+		 */
+		exports.isexe = impl.isexe;
+		/**
+		 * Synchronously determine whether a path is executable on the
+		 * current platform.
+		 */
+		exports.sync = impl.sync;
+		
+	} (cjs));
+	return cjs;
+}
+
+var lib;
+var hasRequiredLib;
+
+function requireLib () {
+	if (hasRequiredLib) return lib;
+	hasRequiredLib = 1;
+	const { isexe, sync: isexeSync } = requireCjs();
+	const { join, delimiter, sep, posix } = require$$1__default;
+
+	const isWindows = process.platform === 'win32';
+
+	// used to check for slashed in commands passed in. always checks for the posix
+	// seperator on all platforms, and checks for the current separator when not on
+	// a posix platform. don't use the isWindows check for this since that is mocked
+	// in tests but we still need the code to actually work when called. that is also
+	// why it is ignored from coverage.
+	/* istanbul ignore next */
+	const rSlash = new RegExp(`[${posix.sep}${sep === posix.sep ? '' : sep}]`.replace(/(\\)/g, '\\$1'));
+	const rRel = new RegExp(`^\\.${rSlash.source}`);
+
+	const getNotFoundError = (cmd) =>
+	  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' });
+
+	const getPathInfo = (cmd, {
+	  path: optPath = process.env.PATH,
+	  pathExt: optPathExt = process.env.PATHEXT,
+	  delimiter: optDelimiter = delimiter,
+	}) => {
+	  // If it has a slash, then we don't bother searching the pathenv.
+	  // just check the file itself, and that's it.
+	  const pathEnv = cmd.match(rSlash) ? [''] : [
+	    // windows always checks the cwd first
+	    ...(isWindows ? [process.cwd()] : []),
+	    ...(optPath || /* istanbul ignore next: very unusual */ '').split(optDelimiter),
+	  ];
+
+	  if (isWindows) {
+	    const pathExtExe = optPathExt ||
+	      ['.EXE', '.CMD', '.BAT', '.COM'].join(optDelimiter);
+	    const pathExt = pathExtExe.split(optDelimiter).flatMap((item) => [item, item.toLowerCase()]);
+	    if (cmd.includes('.') && pathExt[0] !== '') {
+	      pathExt.unshift('');
+	    }
+	    return { pathEnv, pathExt, pathExtExe }
+	  }
+
+	  return { pathEnv, pathExt: [''] }
+	};
+
+	const getPathPart = (raw, cmd) => {
+	  const pathPart = /^".*"$/.test(raw) ? raw.slice(1, -1) : raw;
+	  const prefix = !pathPart && rRel.test(cmd) ? cmd.slice(0, 2) : '';
+	  return prefix + join(pathPart, cmd)
+	};
+
+	const which = async (cmd, opt = {}) => {
+	  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt);
+	  const found = [];
+
+	  for (const envPart of pathEnv) {
+	    const p = getPathPart(envPart, cmd);
+
+	    for (const ext of pathExt) {
+	      const withExt = p + ext;
+	      const is = await isexe(withExt, { pathExt: pathExtExe, ignoreErrors: true });
+	      if (is) {
+	        if (!opt.all) {
+	          return withExt
+	        }
+	        found.push(withExt);
+	      }
+	    }
+	  }
+
+	  if (opt.all && found.length) {
+	    return found
+	  }
+
+	  if (opt.nothrow) {
+	    return null
+	  }
+
+	  throw getNotFoundError(cmd)
+	};
+
+	const whichSync = (cmd, opt = {}) => {
+	  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt);
+	  const found = [];
+
+	  for (const pathEnvPart of pathEnv) {
+	    const p = getPathPart(pathEnvPart, cmd);
+
+	    for (const ext of pathExt) {
+	      const withExt = p + ext;
+	      const is = isexeSync(withExt, { pathExt: pathExtExe, ignoreErrors: true });
+	      if (is) {
+	        if (!opt.all) {
+	          return withExt
+	        }
+	        found.push(withExt);
+	      }
+	    }
+	  }
+
+	  if (opt.all && found.length) {
+	    return found
+	  }
+
+	  if (opt.nothrow) {
+	    return null
+	  }
+
+	  throw getNotFoundError(cmd)
+	};
+
+	lib = which;
+	which.sync = whichSync;
+	return lib;
+}
+
+var libExports = requireLib();
+var which = /*@__PURE__*/getDefaultExportFromCjs(libExports);
+
+async function getGitProjectRoot() {
+    if (process.env.GITHUB_WORKSPACE) {
+        return process.env.GITHUB_WORKSPACE;
+    }
+    // check if git command exists and .git folder
+    const gitCommand = 'git';
+    const gitFolder = '.git';
+    try {
+        const gitPath = await which(gitCommand);
+        if (!gitPath) {
+            throw new Error(`${gitCommand} command not found`);
+        }
+    }
+    catch {
+        throw new Error(`${gitCommand} command not found`);
+    }
+    if (!fs__default.existsSync(gitFolder)) {
+        throw new Error(`${gitFolder} folder not found`);
+    }
+    const gitRoot = execSync(`${gitCommand} rev-parse --show-toplevel`, {
+        stdio: 'inherit'
+    });
+    return gitRoot.toString().trim();
+}
+
 async function buildMode() {
     const jobIncludeConfig = getJobIncludeConfig();
+    const templateValues = {
+        env: process.env,
+        GIT_PROJECT_ROOT: getGitProjectRoot()
+    };
+    // Login to repositories
+    for (const repository of Object.values(jobIncludeConfig.repositories || {})) {
+        const repositoryClass = await getRepositoryClass(repository.type, repository, templateValues);
+        await repositoryClass.login();
+    }
     return {
         buildOutput: {
             temp: JSON.stringify(jobIncludeConfig, null, 2)
