@@ -1,9 +1,7 @@
 {
   "job": "linux-debug-amd64",
   "ci": {
-    "defaultRunnerLabels": [
-      "ubuntu-24.04"
-    ]
+    "defaultRunnerLabels": ["ubuntu-24.04"]
   },
   "containerfilePath": "{{GIT_PROJECT_ROOT}}/Containerfile",
   "contextPath": "{{GIT_PROJECT_ROOT}}",
@@ -23,11 +21,7 @@
       "default": "1.23.4",
       "cmd": "mise current go",
       "env_var": "GO_VERSION",
-      "orderPrecedence": [
-        "cmd",
-        "env_var",
-        "default"
-      ]
+      "orderPrecedence": ["cmd", "env_var", "default"]
     }
   }
 }

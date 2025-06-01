@@ -11,7 +11,7 @@ export async function getRepositoryClass(
   // check if there is a custom repository class for this type named <type>.js in the repositories/types folder
   try {
     core.debug(`Attempting to import repository class for type: ${type}`)
-    const repositoryClass = await import(`./types/${type}.js`)
+    const repositoryClass = await import(`./repositories/types/${type}.js`)
     core.debug(`Repository class: ${repositoryClass.default}`)
     return new repositoryClass.default(repositoryConfig, templateValues)
   } catch (error) {

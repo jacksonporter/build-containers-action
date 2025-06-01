@@ -366,3 +366,4 @@ build-iPhoneSimulator/
 # Custom
 !scripts/lib
 .last-dev-env
+buildOutput.json
