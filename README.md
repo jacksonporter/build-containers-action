@@ -1,10 +1,8 @@
 # Create a GitHub Action Using TypeScript
 
-[![GitHub Super-Linter](https://github.com/jacksonporter/build-containers-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/jacksonporter/build-containers-action/actions/workflows/ci.yml/badge.svg)
 [![Check dist/](https://github.com/jacksonporter/build-containers-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/jacksonporter/build-containers-action/actions/workflows/check-dist.yml)
 [![CodeQL](https://github.com/jacksonporter/build-containers-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/jacksonporter/build-containers-action/actions/workflows/codeql-analysis.yml)
-[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
 > This project is based on the
 > [GitHub Actions TypeScript Action Template](https://github.com/jacksonporter/build-containers-action).

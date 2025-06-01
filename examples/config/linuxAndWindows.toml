@@ -1,0 +1,98 @@
+[default]
+# Default container file path
+containerfilePath = "{{GIT_PROJECT_ROOT}}/Containerfile"
+contextPath = "{{GIT_PROJECT_ROOT}}"
+selectedBuildArgs = ["GO_VERSION"]
+
+# Default build args
+buildArgs.GO_VERSION.default = "1.23.4"
+buildArgs.GO_VERSION.cmd = "mise current go"
+buildArgs.GO_VERSION.env_var = "GO_VERSION"
+buildArgs.GO_VERSION.orderPrecedence = ["cmd", "env_var", "default"]
+
+# Default CI settings
+ci.default_runner_label = "ubuntu-latest"
+ci.use_buildkit = false
+
+# ##############################################################################
+# Debug container
+# ##############################################################################
+[containers.debug]
+name = "debug"
+
+# Container platforms
+
+# linux/amd64 variant
+linuxPlatforms.amd64.platform_slug = "linux/amd64"
+linuxPlatforms.amd64.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+
+# linux/arm64 variant
+linuxPlatforms.arm64.platform_slug = "linux/arm64"
+linuxPlatforms.arm64.ci.default_runner_labels = [
+  "ubuntu-24.04-arm",
+] # arm64 linux runner
+
+# linux/ppc64le variant
+linuxPlatforms.ppc64le.platform_slug = "linux/ppc64le"
+linuxPlatforms.ppc64le.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+linuxPlatforms.ppc64le.ci.use_buildkit = true
+
+# linux/s390x variant
+linuxPlatforms.s390x.platform_slug = "linux/s390x"
+linuxPlatforms.s390x.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+linuxPlatforms.s390x.ci.use_buildkit = true
+
+# windows/amd64 variant
+windowsPlatforms.amd64.arch = "amd64"
+windowsPlatforms.amd64.containerfilePath = "{{GIT_PROJECT_ROOT}}/Dockerfile.windows"
+windowsPlatforms.amd64.ci.default_runner_labels = [
+  "windows-2025",
+] # x86_64 windows runner
+
+
+# ##############################################################################
+# "Release" container
+# ##############################################################################
+[containers.release]
+name = "release"
+
+# Container platforms
+
+# linux/amd64 variant
+linuxPlatforms.amd64.platform_slug = "linux/amd64"
+linuxPlatforms.amd64.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+
+# linux/arm64 variant
+linuxPlatforms.arm64.platform_slug = "linux/arm64"
+linuxPlatforms.arm64.ci.default_runner_labels = [
+  "ubuntu-24.04-arm",
+] # arm64 linux runner
+
+# linux/ppc64le variant
+linuxPlatforms.ppc64le.platform_slug = "linux/ppc64le"
+linuxPlatforms.ppc64le.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+linuxPlatforms.ppc64le.ci.use_buildkit = true
+
+# linux/s390x variant
+linuxPlatforms.s390x.platform_slug = "linux/s390x"
+linuxPlatforms.s390x.ci.default_runner_labels = [
+  "ubuntu-24.04",
+] # x86_64 linux runner
+linuxPlatforms.s390x.ci.use_buildkit = true
+
+# windows/amd64 variant
+windowsPlatforms.amd64.arch = "amd64"
+windowsPlatforms.amd64.containerfilePath = "{{GIT_PROJECT_ROOT}}/Dockerfile.windows"
+windowsPlatforms.amd64.ci.default_runner_labels = [
+  "windows-2025",
+] # x86_64 windows runner
