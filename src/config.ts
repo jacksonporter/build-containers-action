@@ -55,6 +55,7 @@ export interface ConfigDefaults {
   ci?: CIConfig
   containerfilePath?: string
   contextPath?: string
+  target?: string | null
   selectedBuildArgs?: string[]
   buildArgs?: {
     [key: string]: BuildArgConfig
@@ -104,6 +105,17 @@ export function validateConfigDefaults(
       configDefaults.contextPath = parentConfigDefaults.contextPath
     } else {
       configDefaults.contextPath = '${GIT_PROJECT_ROOT}'
+    }
+  }
+
+  // check that target is a string, and if its empty, set to null
+  if (configDefaults.target && typeof configDefaults.target !== 'string') {
+    throw new Error('configDefaults.target must be a string')
+  } else if (!configDefaults.target) {
+    if (parentConfigDefaults?.target) {
+      configDefaults.target = parentConfigDefaults.target
+    } else {
+      configDefaults.target = null
     }
   }
 
@@ -310,6 +322,7 @@ export function validateRepositoryConfig(repositoryConfig: RepositoryConfig) {
 export interface FinalizedPlatformConfig {
   containerfilePath?: string
   contextPath?: string
+  target?: string | null
   ci?: CIConfig
   platform_slug?: string | null
   arch?: string | null
@@ -353,6 +366,7 @@ export function validatePlatformConfig(
   let platformConfigDefaults: ConfigDefaults = {
     containerfilePath: platformConfig?.containerfilePath,
     contextPath: platformConfig.contextPath,
+    target: platformConfig.target,
     selectedBuildArgs: platformConfig.selectedBuildArgs,
     ci: platformConfig.ci,
     buildArgs: platformConfig.buildArgs,
@@ -368,6 +382,7 @@ export function validatePlatformConfig(
 
   platformConfig.containerfilePath = platformConfigDefaults.containerfilePath
   platformConfig.contextPath = platformConfigDefaults.contextPath
+  platformConfig.target = platformConfigDefaults.target
   platformConfig.ci = platformConfigDefaults.ci
   platformConfig.selectedBuildArgs = platformConfigDefaults.selectedBuildArgs
   platformConfig.buildArgs = platformConfigDefaults.buildArgs
@@ -500,6 +515,9 @@ export function validateContainerConfig(
 
   containerConfig.default.contextPath =
     containerConfig.default?.contextPath || containerDefaults?.contextPath
+
+  containerConfig.default.target =
+    containerConfig.default?.target || containerDefaults?.target || null
 
   containerConfig.default.selectedBuildArgs =
     (containerConfig.default.selectedBuildArgs &&
