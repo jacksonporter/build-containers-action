@@ -32,6 +32,7 @@ jobs:
           config: ${{ inputs.config }}
           config-file: ${{ inputs.config-file }}
           config-format: ${{ inputs.config-format }}
+          mode: generate-matrix
     outputs:
       windowsMatrix:
         ${{ steps.build-containers-action-matrix-generation.outputs.windowsMatrix}}
