@@ -8753,7 +8753,6 @@ function buildContainer(containerfilePath, contextPath, buildArgs, tag, target, 
     return tag;
 }
 function addOtherTags(builtTag, fullTags) {
-    coreExports.info(`Adding other tags: ${JSON.stringify(fullTags, null, 2)}`);
     for (const tag of fullTags) {
         if (tag !== builtTag) {
             coreExports.info(`Adding tag: ${tag}`);
@@ -8770,7 +8769,6 @@ function addOtherTags(builtTag, fullTags) {
     }
 }
 function pushTags(tags) {
-    coreExports.info(`Pushing tags: ${JSON.stringify(tags, null, 2)}`);
     const skipPush = coreExports.getInput('skip-push') || process.env.SKIP_PUSH ? true : false;
     if (skipPush) {
         coreExports.info('Skipping push');

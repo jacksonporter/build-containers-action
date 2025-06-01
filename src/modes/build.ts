@@ -154,7 +154,6 @@ export function buildContainer(
 }
 
 export function addOtherTags(builtTag: string, fullTags: string[]) {
-  core.info(`Adding other tags: ${JSON.stringify(fullTags, null, 2)}`)
   for (const tag of fullTags) {
     if (tag !== builtTag) {
       core.info(`Adding tag: ${tag}`)
@@ -171,7 +170,6 @@ export function addOtherTags(builtTag: string, fullTags: string[]) {
 }
 
 export function pushTags(tags: string[]) {
-  core.info(`Pushing tags: ${JSON.stringify(tags, null, 2)}`)
   const skipPush =
     core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
 
