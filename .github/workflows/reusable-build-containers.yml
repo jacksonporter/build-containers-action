@@ -78,6 +78,7 @@ jobs:
         uses: jacksonporter/build-containers-action@jp/v1dev
         env:
           DOCKER_BUILDKIT: '1'
+          GITHUB_TOKEN: ${{ secrets.github-token }}
         with:
           config: |
             ${{ toJson(matrix) }}

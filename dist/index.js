@@ -1,4 +1,4 @@
-import { c as coreExports, g as getDefaultExportFromCjs } from './core-BI5RJUgC.js';
+import { c as coreExports, g as getDefaultExportFromCjs, H as Handlebars } from './index-DJe4DkTu.js';
 import * as fs from 'fs';
 import fs__default from 'fs';
 import { execSync } from 'child_process';
@@ -8279,27 +8279,6 @@ async function getGitProjectRoot() {
     return gitRoot.toString().trim();
 }
 
-async function buildMode() {
-    const jobIncludeConfig = getJobIncludeConfig();
-    const templateValues = {
-        env: process.env,
-        GIT_PROJECT_ROOT: getGitProjectRoot()
-    };
-    if (!process.env.GITHUB_TOKEN) {
-        throw new Error('GITHUB_TOKEN is not set');
-    }
-    // Login to repositories
-    for (const repository of Object.values(jobIncludeConfig.repositories || {})) {
-        const repositoryClass = await getRepositoryClass(repository.type, repository, templateValues);
-        await repositoryClass.login();
-    }
-    return {
-        buildOutput: {
-            temp: JSON.stringify(jobIncludeConfig, null, 2)
-        }
-    };
-}
-
 function validateCIConfig(ciConfig, ciDefaults = {}) {
     // check type of ciConfig is an object, otherwise throw an error
     if (typeof ciConfig !== 'object') {
@@ -8667,6 +8646,122 @@ function validateConfig(config) {
 async function getConfigFromJSON(config) {
     const validatedConfig = validateConfig(config);
     return validatedConfig;
+}
+
+async function* loginToRepositories(jobIncludeConfig, 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+templateValues) {
+    // Login to repositories
+    for (const repository of Object.values(jobIncludeConfig.repositories || {})) {
+        coreExports.info(`Logging in to ${repository.registry}`);
+        const repositoryClass = await getRepositoryClass(repository.type, repository, templateValues);
+        await repositoryClass.login();
+        yield {
+            repository: repository,
+            repositoryClass: repositoryClass
+        };
+    }
+}
+function generateTags(repository, platformTags) {
+    return platformTags.map((platformTag) => {
+        return `${repository.registry}/${repository.repository}:${platformTag}`;
+    });
+}
+function generateBuildArgs(buildArgs) {
+    const buildArgsArray = {};
+    for (const [key, value] of Object.entries(buildArgs)) {
+        let setValue;
+        if (!value.orderPrecedence) {
+            coreExports.warning(`No orderPrecedence set for build arg: ${key}`);
+            value.orderPrecedence = [
+                BuildArgPrecedence.CMD,
+                BuildArgPrecedence.ENV_VAR,
+                BuildArgPrecedence.DEFAULT
+            ];
+        }
+        for (const precedence of value.orderPrecedence) {
+            switch (precedence) {
+                case BuildArgPrecedence.DEFAULT:
+                    setValue = value.default;
+                    break;
+                case BuildArgPrecedence.CMD:
+                    if (!value.cmd) {
+                        coreExports.warning(`No cmd set for build arg: ${key}`);
+                        continue;
+                    }
+                    try {
+                        execSync(value.cmd, {
+                            stdio: 'inherit'
+                        });
+                        setValue = value.cmd.trim();
+                    }
+                    catch (error) {
+                        coreExports.error(`Error executing command: ${error}`);
+                    }
+                    break;
+                case BuildArgPrecedence.ENV_VAR:
+                    setValue = process.env[key] || null;
+                    break;
+            }
+            if (setValue) {
+                buildArgsArray[key] = setValue.toString();
+                continue;
+            }
+        }
+    }
+    return buildArgsArray;
+}
+function buildContainer(containerfilePath, contextPath, buildArgs, tag) {
+    // const skipPush =
+    //   core.getInput('skip-push') || process.env.SKIP_PUSH ? true : false
+    coreExports.info(`Building container with tag: ${tag}`);
+    const command = ['docker', 'build', '-f', containerfilePath, '-t', tag];
+    for (const [key, value] of Object.entries(buildArgs)) {
+        command.push('--build-arg');
+        command.push(`${key}=${value}`);
+    }
+    command.push(contextPath);
+    const strCommand = command.join(' ');
+    coreExports.info(`Running command: ${strCommand}`);
+    try {
+        execSync(strCommand, {
+            stdio: 'inherit'
+        });
+    }
+    catch (error) {
+        coreExports.error(`Error building container: ${error}`);
+        throw error;
+    }
+    return tag;
+}
+async function buildMode() {
+    const jobIncludeConfig = getJobIncludeConfig();
+    const templateValues = {
+        env: process.env,
+        GIT_PROJECT_ROOT: getGitProjectRoot()
+    };
+    // populate tags
+    const populatedPlatformTags = jobIncludeConfig.platformTagTemplates?.map((template) => {
+        return Handlebars.compile(template)(templateValues);
+    }) || [];
+    if (populatedPlatformTags.length === 0) {
+        throw new Error('No platform tag templates found');
+    }
+    const fullTags = [];
+    for await (const loginResult of loginToRepositories(jobIncludeConfig, templateValues)) {
+        coreExports.info(`Logged in to ${loginResult.repository.registry}`);
+        for (const tag of generateTags(loginResult.repository, populatedPlatformTags)) {
+            fullTags.push(tag);
+        }
+    }
+    const buildArgs = generateBuildArgs(jobIncludeConfig.buildArgs || {});
+    const builtTag = buildContainer(jobIncludeConfig.containerfilePath || 'Dockerfile', jobIncludeConfig.contextPath || '.', buildArgs, fullTags[0]);
+    coreExports.info(`Build complete: ${builtTag}`);
+    return {
+        buildOutput: {
+            temp: JSON.stringify(jobIncludeConfig, null, 2)
+        }
+    };
 }
 
 function buildLinuxMatrixFromFinalizedContainerConfig(config) {
