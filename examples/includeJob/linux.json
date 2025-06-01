@@ -1,0 +1,33 @@
+{
+  "job": "linux-debug-amd64",
+  "ci": {
+    "defaultRunnerLabels": [
+      "ubuntu-24.04"
+    ]
+  },
+  "containerfilePath": "{{GIT_PROJECT_ROOT}}/Containerfile",
+  "contextPath": "{{GIT_PROJECT_ROOT}}",
+  "platformTagTemplates": [
+    "{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}",
+    "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}"
+  ],
+  "manifestTagTemplates": [
+    "{{CONTAINER_NAME}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}",
+    "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}"
+  ],
+  "repositories": {},
+  "arch": "amd64",
+  "platform_slug": "linux/amd64",
+  "buildArgs": {
+    "GO_VERSION": {
+      "default": "1.23.4",
+      "cmd": "mise current go",
+      "env_var": "GO_VERSION",
+      "orderPrecedence": [
+        "cmd",
+        "env_var",
+        "default"
+      ]
+    }
+  }
+}

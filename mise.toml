@@ -41,9 +41,13 @@ run = "mise exec -- npx make-coverage-badge --output-path ./badges/coverage.svg"
 description = "Run CI tests"
 run = "mise exec -- NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest"
 
-[tasks.local-action]
-description = "Run the local action"
-run = "mise exec -- npx @github/local-action . src/main.ts .env"
+[tasks.local-action-generate-matrix]
+description = "Run the local action to generate the matrix"
+run = "mise exec -- npx @github/local-action . src/main.ts action-tests/generate-matrix/.env"
+
+[tasks.local-action-build]
+description = "Run the local action to build the containers"
+run = "mise exec -- npx @github/local-action . src/main.ts action-tests/build/.env"
 
 [tasks.lint]
 description = "Lint the project"

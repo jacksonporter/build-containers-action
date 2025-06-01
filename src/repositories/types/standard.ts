@@ -1,4 +1,4 @@
-import * as handlebars from 'handlebars'
+import Handlebars from 'handlebars'
 import * as core from '@actions/core'
 import { execSync } from 'child_process'
 import { RepositoryConfig } from '../../config.js'
@@ -11,7 +11,7 @@ export abstract class StandardRepository {
     repositoryConfig: RepositoryConfig,
     templateValues: { [key: string]: string }
   ) {
-    const configTemplateFunc = handlebars.compile(
+    const configTemplateFunc = Handlebars.compile(
       JSON.stringify(repositoryConfig)
     )
     const resolvedConfig = configTemplateFunc({

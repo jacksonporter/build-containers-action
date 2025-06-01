@@ -61,6 +61,20 @@ repos:
         language: system
         pass_filenames: false
 
+      - id: test-local-action-generate-matrix
+        name: test-local-action-generate-matrix
+        entry: mise run 'local-action-generate-matrix'
+        files: .*
+        language: system
+        pass_filenames: false
+
+      - id: test-local-action-build
+        name: test-local-action-build
+        entry: mise run 'local-action-build'
+        files: .*
+        language: system
+        pass_filenames: false
+
       # - id: test
       #   name: test
       #   entry: mise run 'test'
