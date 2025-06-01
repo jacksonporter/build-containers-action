@@ -35149,6 +35149,18 @@ function validateConfigDefaults(configDefaults, parentConfigDefaults) {
             configDefaults.contextPath = '${GIT_PROJECT_ROOT}';
         }
     }
+    // check that target is a string, and if its empty, set to null
+    if (configDefaults.target && typeof configDefaults.target !== 'string') {
+        throw new Error('configDefaults.target must be a string');
+    }
+    else if (!configDefaults.target) {
+        if (parentConfigDefaults?.target) {
+            configDefaults.target = parentConfigDefaults.target;
+        }
+        else {
+            configDefaults.target = null;
+        }
+    }
     const selectedBuildArgs = configDefaults.selectedBuildArgs &&
         configDefaults.selectedBuildArgs.length > 0
         ? configDefaults.selectedBuildArgs
@@ -35294,6 +35306,7 @@ function validatePlatformConfig(platformConfig, containerDefaults, repositories)
     let platformConfigDefaults = {
         containerfilePath: platformConfig?.containerfilePath,
         contextPath: platformConfig.contextPath,
+        target: platformConfig.target,
         selectedBuildArgs: platformConfig.selectedBuildArgs,
         ci: platformConfig.ci,
         buildArgs: platformConfig.buildArgs,
@@ -35304,6 +35317,7 @@ function validatePlatformConfig(platformConfig, containerDefaults, repositories)
     platformConfigDefaults = validateConfigDefaults(platformConfigDefaults, containerDefaults);
     platformConfig.containerfilePath = platformConfigDefaults.containerfilePath;
     platformConfig.contextPath = platformConfigDefaults.contextPath;
+    platformConfig.target = platformConfigDefaults.target;
     platformConfig.ci = platformConfigDefaults.ci;
     platformConfig.selectedBuildArgs = platformConfigDefaults.selectedBuildArgs;
     platformConfig.buildArgs = platformConfigDefaults.buildArgs;
@@ -35365,6 +35379,8 @@ function validateContainerConfig(containerConfig, containerDefaults, repositorie
             containerDefaults?.containerfilePath;
     containerConfig.default.contextPath =
         containerConfig.default?.contextPath || containerDefaults?.contextPath;
+    containerConfig.default.target =
+        containerConfig.default?.target || containerDefaults?.target || null;
     containerConfig.default.selectedBuildArgs =
         (containerConfig.default.selectedBuildArgs &&
             containerConfig.default.selectedBuildArgs.length > 0
