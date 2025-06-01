@@ -35,9 +35,11 @@ jobs:
           mode: generate-matrix
     outputs:
       windowsMatrix:
-        ${{ steps.build-containers-action-matrix-generation.outputs.windowsMatrix}}
+        ${{
+        steps.build-containers-action-matrix-generation.outputs.windowsMatrix}}
       linuxMatrix:
-        ${{ steps.build-containers-action-matrix-generation.outputs.linuxMatrix}}
+        ${{
+        steps.build-containers-action-matrix-generation.outputs.linuxMatrix}}
 
   build-linux:
     needs:

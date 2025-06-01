@@ -12,21 +12,21 @@ inputs:
   config:
     description: The configuration JSON for the container image
     required: true
-    default: ""
+    default: ''
   config-file:
     description: The path to the configuration file for the container image
     required: false
-    default: "containers-build.toml"
+    default: 'containers-build.toml'
   config-format:
     description: The format of the configuration file
     required: false
-    default: "toml"
+    default: 'toml'
   mode:
     description:
       The mode to run the action in, options are generate-matrix, build,
       combine-manifest, and push
     required: false
-    default: "build"
+    default: 'build'
 
 # Define your outputs here.
 outputs:

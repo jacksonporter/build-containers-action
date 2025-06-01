@@ -4,7 +4,7 @@ import {
   CIConfig,
   FinalizedContainerConfig,
   FinalizedLinuxPlatformConfig,
-  FinalizedWindowsPlatformConfig
+  FinalizedPlatformConfig
 } from './config.js'
 
 export interface LinuxJobInclude {
@@ -87,7 +87,7 @@ export function buildWindowsMatrixFromFinalizedContainerConfig(
 
       // create the include object
       matrix.include.push({
-        ...(l as FinalizedWindowsPlatformConfig),
+        ...(l as FinalizedPlatformConfig),
         job: finalizedJobKey
       } as WindowsJobInclude)
     }
