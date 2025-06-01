@@ -8738,7 +8738,9 @@ async function buildMode() {
     const jobIncludeConfig = getJobIncludeConfig();
     const templateValues = {
         env: process.env,
-        GIT_PROJECT_ROOT: getGitProjectRoot()
+        GIT_PROJECT_ROOT: getGitProjectRoot(),
+        CONTAINER_NAME: jobIncludeConfig.containerName,
+        ARCH: jobIncludeConfig.arch || process.arch
     };
     // populate tags
     const populatedPlatformTags = jobIncludeConfig.platformTagTemplates?.map((template) => {
@@ -8779,7 +8781,8 @@ function buildLinuxMatrixFromFinalizedContainerConfig(config) {
             // create the include object
             matrix.include.push({
                 ...l,
-                job: finalizedJobKey
+                job: finalizedJobKey,
+                containerName: i
             });
         }
     }
@@ -8800,7 +8803,8 @@ function buildWindowsMatrixFromFinalizedContainerConfig(config) {
             // create the include object
             matrix.include.push({
                 ...l,
-                job: finalizedJobKey
+                job: finalizedJobKey,
+                containerName: i
             });
         }
     }

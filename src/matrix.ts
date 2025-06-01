@@ -7,6 +7,7 @@ import {
 
 export interface JobInclude extends FinalizedPlatformConfig {
   job: string
+  containerName: string
 }
 
 export interface LinuxJobInclude extends JobInclude {
@@ -36,7 +37,8 @@ export function buildLinuxMatrixFromFinalizedContainerConfig(
       // create the include object
       matrix.include.push({
         ...(l as FinalizedLinuxPlatformConfig),
-        job: finalizedJobKey
+        job: finalizedJobKey,
+        containerName: i
       } as JobInclude)
     }
   }
@@ -72,7 +74,8 @@ export function buildWindowsMatrixFromFinalizedContainerConfig(
       // create the include object
       matrix.include.push({
         ...(l as FinalizedPlatformConfig),
-        job: finalizedJobKey
+        job: finalizedJobKey,
+        containerName: i
       } as JobInclude)
     }
   }

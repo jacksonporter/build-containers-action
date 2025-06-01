@@ -138,7 +138,9 @@ export async function buildMode(): Promise<ModeReturn> {
 
   const templateValues = {
     env: process.env,
-    GIT_PROJECT_ROOT: getGitProjectRoot()
+    GIT_PROJECT_ROOT: getGitProjectRoot(),
+    CONTAINER_NAME: jobIncludeConfig.containerName,
+    ARCH: jobIncludeConfig.arch || process.arch
   }
 
   // populate tags
