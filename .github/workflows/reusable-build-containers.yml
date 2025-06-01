@@ -3,9 +3,8 @@ name: Build Containers
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
+      github-token:
         description: The GitHub token to use for the build
-        required: true
     inputs:
       config:
         type: string
@@ -89,7 +88,7 @@ jobs:
         if: matrix.ci.useBuildkit == false
         uses: jacksonporter/build-containers-action@jp/v1dev
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github-token }}
         with:
           config: |
             ${{ toJson(matrix) }}
@@ -126,7 +125,7 @@ jobs:
       - id: build-containers-action-build
         uses: jacksonporter/build-containers-action@jp/v1dev
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github-token }}
         with:
           config: |
             ${{ toJson(matrix) }}
