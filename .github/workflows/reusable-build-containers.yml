@@ -26,17 +26,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - id: build-container-action-matrix-generation
-        uses: jacksonporter/build-container-action@jp/v1dev
+      - id: build-containers-action-matrix-generation
+        uses: jacksonporter/build-containers-action@jp/v1dev
         with:
           config: ${{ inputs.config }}
           config-file: ${{ inputs.config-file }}
           config-format: ${{ inputs.config-format }}
     outputs:
       windowsMatrix:
-        ${{ steps.build-container-action-matrix-generation.outputs.windowsMatrix}}
+        ${{ steps.build-containers-action-matrix-generation.outputs.windowsMatrix}}
       linuxMatrix:
-        ${{ steps.build-container-action-matrix-generation.outputs.linuxMatrix}}
+        ${{ steps.build-containers-action-matrix-generation.outputs.linuxMatrix}}
 
   build-linux:
     needs:

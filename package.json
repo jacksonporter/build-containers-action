@@ -1,17 +1,17 @@
 {
-  "name": "build-container-action",
+  "name": "build-containers-action",
   "description": "GitHub Actions build container action",
   "version": "0.0.0",
   "author": "Jackson Porter (JP)",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/jacksonporter/build-container-action",
+  "homepage": "https://github.com/jacksonporter/build-containers-action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jacksonporter/build-container-action.git"
+    "url": "git+https://github.com/jacksonporter/build-containers-action.git"
   },
   "bugs": {
-    "url": "https://github.com/jacksonporter/build-container-action/issues"
+    "url": "https://github.com/jacksonporter/build-containers-action/issues"
   },
   "keywords": [
     "actions"
