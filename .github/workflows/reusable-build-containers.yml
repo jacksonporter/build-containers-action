@@ -44,7 +44,7 @@ jobs:
       - generate-matrix
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.linuxMatrix) }}
-    runs-on: ${{ fromJson(matrix.ci.defaultRunnerLabels) }}
+    runs-on: ${{ matrix.ci.defaultRunnerLabels }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,7 +56,7 @@ jobs:
       - generate-matrix
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.windowsMatrix) }}
-    runs-on: ${{ fromJson(matrix.ci.defaultRunnerLabels) }}
+    runs-on: ${{ matrix.ci.defaultRunnerLabels }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
