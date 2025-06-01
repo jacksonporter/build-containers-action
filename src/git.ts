@@ -25,8 +25,14 @@ export async function getGitProjectRoot(): Promise<string> {
   }
 
   const gitRoot = execSync(`${gitCommand} rev-parse --show-toplevel`, {
-    stdio: 'inherit'
+    stdio: 'pipe'
   })
+
+  if (!gitRoot) {
+    throw new Error(
+      'Failed to get git root directory - command returned no output'
+    )
+  }
 
   return gitRoot.toString().trim()
 }

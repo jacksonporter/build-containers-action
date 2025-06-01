@@ -8274,8 +8274,11 @@ async function getGitProjectRoot() {
         throw new Error(`${gitFolder} folder not found`);
     }
     const gitRoot = execSync(`${gitCommand} rev-parse --show-toplevel`, {
-        stdio: 'inherit'
+        stdio: 'pipe'
     });
+    if (!gitRoot) {
+        throw new Error('Failed to get git root directory - command returned no output');
+    }
     return gitRoot.toString().trim();
 }
 
@@ -8691,14 +8694,21 @@ function generateBuildArgs(buildArgs) {
                         continue;
                     }
                     try {
-                        setValue = execSync(value.cmd, {
-                            stdio: 'inherit'
-                        })
-                            .toString()
-                            .trim();
+                        const output = execSync(value.cmd, {
+                            stdio: 'pipe'
+                        });
+                        if (output) {
+                            setValue = output.toString().trim();
+                        }
+                        else {
+                            coreExports.warning(`Command '${value.cmd}' returned no output, setting to null`);
+                            setValue = null;
+                            continue;
+                        }
                     }
                     catch (error) {
-                        coreExports.error(`Error executing command: ${error}`);
+                        coreExports.error(`Error executing command '${value.cmd}': ${error}`);
+                        throw error;
                     }
                     break;
                 case BuildArgPrecedence.ENV_VAR:

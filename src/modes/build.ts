@@ -76,13 +76,22 @@ export function generateBuildArgs(buildArgs: Record<string, BuildArgConfig>) {
           }
 
           try {
-            setValue = execSync(value.cmd, {
-              stdio: 'inherit'
+            const output = execSync(value.cmd, {
+              stdio: 'pipe'
             })
-              .toString()
-              .trim()
+
+            if (output) {
+              setValue = output.toString().trim()
+            } else {
+              core.warning(
+                `Command '${value.cmd}' returned no output, setting to null`
+              )
+              setValue = null
+              continue
+            }
           } catch (error) {
-            core.error(`Error executing command: ${error}`)
+            core.error(`Error executing command '${value.cmd}': ${error}`)
+            throw error
           }
           break
         case BuildArgPrecedence.ENV_VAR:
