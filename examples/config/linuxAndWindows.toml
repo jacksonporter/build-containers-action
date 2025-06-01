@@ -3,6 +3,7 @@
 containerfilePath = "{{GIT_PROJECT_ROOT}}/Containerfile"
 contextPath = "{{GIT_PROJECT_ROOT}}"
 selectedBuildArgs = ["GO_VERSION"]
+selectedRepositories = ["ghcr-jacksonporter-bootstrap-olm"]
 
 # Default build args
 buildArgs.GO_VERSION.default = "1.23.4"
@@ -10,15 +11,30 @@ buildArgs.GO_VERSION.cmd = "mise current go"
 buildArgs.GO_VERSION.env_var = "GO_VERSION"
 buildArgs.GO_VERSION.orderPrecedence = ["cmd", "env_var", "default"]
 
+# Default tag templates
+platformTagTemplates = ["{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}", "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}"]
+manifestTagTemplates = ["{{CONTAINER_NAME}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}", "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}"]
+
 # Default CI settings
 ci.defaultRunnerLabels = ["ubuntu-latest"]
 ci.useBuildkit = false
+
+[repositories.ghcr-jacksonporter-bootstrap-olm]
+type = "standard"
+registry = "ghcr.io"
+repository = "jacksonporter/bootstrap-olm"
+usernameTemplate = "{{env.GITHUB_ACTOR}}"
+passwordTemplate = "{{env.GITHUB_TOKEN}}"
 
 # ##############################################################################
 # Debug container
 # ##############################################################################
 [containers.debug]
 name = "debug"
+
+repositories.ghcr.type = "ghcr"
+repositories.ghcr.registry = "ghcr.io"
+repositories.ghcr.repository = "jacksonporter/bootstrap-olm"
 
 # Container platforms
 
@@ -61,6 +77,10 @@ windowsPlatforms.amd64.ci.defaultRunnerLabels = [
 # ##############################################################################
 [containers.release]
 name = "release"
+
+# Default tag templates
+default.platformTagTemplates = ["{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}"]
+default.manifestTagTemplates = ["{{env.GITHUB_REF_NAME}}-{{env.GITHUB_RUN_NUMBER}}"]
 
 # Container platforms
 

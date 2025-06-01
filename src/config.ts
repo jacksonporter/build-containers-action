@@ -1,6 +1,4 @@
 import * as core from '@actions/core'
-import Handlebars from 'handlebars'
-import { getGitProjectRoot } from './git.js'
 
 export interface CIConfig {
   [key: string]: string | string[] | boolean | number | null
@@ -61,6 +59,9 @@ export interface ConfigDefaults {
   buildArgs?: {
     [key: string]: BuildArgConfig
   }
+  platformTagTemplates?: string[]
+  manifestTagTemplates?: string[]
+  selectedRepositories?: string[]
 }
 
 export function validateConfigDefaults(
@@ -126,6 +127,61 @@ export function validateConfigDefaults(
       configDefaults?.buildArgs?.[key] || {},
       parentConfigDefaults?.buildArgs?.[key] || {}
     )
+  }
+
+  // check that platformTagTemplates is an array of strings, and if not set, set to ["{{CONTAINER_NAME}}-{{ARCH}}-{{GITHUB_RUN_ID}}-{{GITHUB_RUN_NUMBER}}"]
+  if (
+    configDefaults.platformTagTemplates &&
+    !Array.isArray(configDefaults.platformTagTemplates)
+  ) {
+    throw new Error(
+      'configDefaults.platformTagTemplates must be an array of strings'
+    )
+  } else if (!configDefaults.platformTagTemplates) {
+    if (parentConfigDefaults?.platformTagTemplates) {
+      configDefaults.platformTagTemplates =
+        parentConfigDefaults.platformTagTemplates
+    } else {
+      configDefaults.platformTagTemplates = [
+        '{{CONTAINER_NAME}}-{{ARCH}}-{{GITHUB_RUN_ID}}-{{GITHUB_RUN_NUMBER}}'
+      ]
+    }
+  }
+
+  // check that manifestTagTemplates is an array of strings, and if not set, set to ["{{CONTAINER_NAME}}-{{GITHUB_RUN_ID}}-{{GITHUB_RUN_NUMBER}}"]
+  if (
+    configDefaults.manifestTagTemplates &&
+    !Array.isArray(configDefaults.manifestTagTemplates)
+  ) {
+    throw new Error(
+      'configDefaults.manifestTagTemplates must be an array of strings'
+    )
+  } else if (!configDefaults.manifestTagTemplates) {
+    if (parentConfigDefaults?.manifestTagTemplates) {
+      configDefaults.manifestTagTemplates =
+        parentConfigDefaults.manifestTagTemplates
+    } else {
+      configDefaults.manifestTagTemplates = [
+        '{{CONTAINER_NAME}}-{{GITHUB_RUN_ID}}-{{GITHUB_RUN_NUMBER}}'
+      ]
+    }
+  }
+
+  // check that selectedRepositories is an array of strings, and if not set, set to []
+  if (
+    configDefaults.selectedRepositories &&
+    !Array.isArray(configDefaults.selectedRepositories)
+  ) {
+    throw new Error(
+      'configDefaults.selectedRepositories must be an array of strings'
+    )
+  } else if (!configDefaults.selectedRepositories) {
+    if (parentConfigDefaults?.selectedRepositories) {
+      configDefaults.selectedRepositories =
+        parentConfigDefaults.selectedRepositories
+    } else {
+      configDefaults.selectedRepositories = []
+    }
   }
 
   return {
@@ -208,54 +264,85 @@ export function validateBuildArgConfig(
   return buildArgConfig
 }
 
-export interface LinuxPlatformConfig {
+export interface RepositoryConfig {
+  type: string
+  registry: string
+  repository: string
+  usernameTemplate?: string | null
+  passwordTemplate?: string | null
+}
+
+export function validateRepositoryConfig(repositoryConfig: RepositoryConfig) {
+  // check type of repositoryConfig is an object, otherwise throw an error
+  if (typeof repositoryConfig !== 'object') {
+    throw new Error('repositoryConfig must be an object')
+  }
+
+  if (!repositoryConfig.type) {
+    throw new Error('repositoryConfig.type is required')
+  }
+  if (!repositoryConfig.registry) {
+    throw new Error('repositoryConfig.registry is required')
+  }
+  if (!repositoryConfig.repository) {
+    throw new Error('repositoryConfig.repository is required')
+  }
+
+  // check that usernameTemplate is a string, and if its empty, set to null
+  if (!repositoryConfig.usernameTemplate) {
+    core.warning(
+      'repositoryConfig.usernameTemplate is not set, setting to null'
+    )
+    repositoryConfig.usernameTemplate = null
+  }
+
+  // check that passwordTemplate is a string, and if its empty, set to null
+  if (!repositoryConfig.passwordTemplate) {
+    core.warning(
+      'repositoryConfig.passwordTemplate is not set, setting to null'
+    )
+    repositoryConfig.passwordTemplate = null
+  }
+
+  return repositoryConfig
+}
+
+export interface FinalizedPlatformConfig {
   containerfilePath?: string
   contextPath?: string
   ci?: CIConfig
   platform_slug?: string | null
   arch?: string | null
-  selectedBuildArgs?: string[]
   buildArgs?: {
     [key: string]: BuildArgConfig
   }
+  platformTagTemplates?: string[]
+  manifestTagTemplates?: string[]
+  repositories?: {
+    [key: string]: RepositoryConfig
+  }
 }
 
-export interface FinalizedLinuxPlatformConfig {
-  containerfilePath?: string
-  contextPath?: string
-  ci?: CIConfig
+export interface PlatformConfig extends FinalizedPlatformConfig {
+  selectedBuildArgs?: string[]
+  selectedRepositories?: string[]
+}
+
+export interface LinuxPlatformConfig extends PlatformConfig {
   platform_slug?: string | null
-  arch?: string | null
-  buildArgs?: {
-    [key: string]: BuildArgConfig
-  }
 }
 
-export interface WindowsPlatformConfig {
-  containerfilePath?: string
-  contextPath?: string
-  ci?: CIConfig
-  selectedBuildArgs?: string[]
-  buildArgs?: {
-    [key: string]: BuildArgConfig
-  }
-  arch?: string | null
-}
-
-export interface FinalizedWindowsPlatformConfig {
-  containerfilePath?: string
-  contextPath?: string
-  arch?: string | null
-  ci?: CIConfig
-  buildArgs?: {
-    [key: string]: BuildArgConfig
-  }
+export interface FinalizedLinuxPlatformConfig extends FinalizedPlatformConfig {
+  platform_slug?: string | null
 }
 
 export function validatePlatformConfig(
-  platformConfig: LinuxPlatformConfig | WindowsPlatformConfig,
-  containerDefaults: ConfigDefaults
-): FinalizedLinuxPlatformConfig | FinalizedWindowsPlatformConfig {
+  platformConfig: PlatformConfig,
+  containerDefaults: ConfigDefaults,
+  repositories: {
+    [key: string]: RepositoryConfig
+  }
+): FinalizedPlatformConfig {
   core.debug('Validating platform config')
 
   // check type of linuxPlatformConfig is an object, otherwise throw an error
@@ -268,7 +355,10 @@ export function validatePlatformConfig(
     contextPath: platformConfig.contextPath,
     selectedBuildArgs: platformConfig.selectedBuildArgs,
     ci: platformConfig.ci,
-    buildArgs: platformConfig.buildArgs
+    buildArgs: platformConfig.buildArgs,
+    platformTagTemplates: platformConfig.platformTagTemplates,
+    manifestTagTemplates: platformConfig.manifestTagTemplates,
+    selectedRepositories: platformConfig.selectedRepositories
   }
 
   platformConfigDefaults = validateConfigDefaults(
@@ -281,18 +371,34 @@ export function validatePlatformConfig(
   platformConfig.ci = platformConfigDefaults.ci
   platformConfig.selectedBuildArgs = platformConfigDefaults.selectedBuildArgs
   platformConfig.buildArgs = platformConfigDefaults.buildArgs
+  platformConfig.platformTagTemplates =
+    platformConfigDefaults.platformTagTemplates
+  platformConfig.manifestTagTemplates =
+    platformConfigDefaults.manifestTagTemplates
+  platformConfig.repositories = {}
+
+  for (const repository of platformConfigDefaults.selectedRepositories || []) {
+    if (!repositories[repository]) {
+      throw new Error(`Repository ${repository} not found`)
+    }
+    platformConfig.repositories[repository] = repositories[repository]
+  }
 
   return platformConfig
 }
 
 export function validateLinuxPlatformConfig(
   linuxPlatformConfig: LinuxPlatformConfig,
-  containerDefaults: ConfigDefaults
+  containerDefaults: ConfigDefaults,
+  repositories: {
+    [key: string]: RepositoryConfig
+  }
 ): FinalizedLinuxPlatformConfig {
   // validate base platform config
   linuxPlatformConfig = validatePlatformConfig(
     linuxPlatformConfig,
-    containerDefaults
+    containerDefaults,
+    repositories
   )
 
   // filter build args by linuxPlatformConfig.selectedBuildArgs
@@ -315,23 +421,29 @@ export function validateLinuxPlatformConfig(
   }
 
   return {
-    containerfilePath: linuxPlatformConfig.containerfilePath,
-    contextPath: linuxPlatformConfig.contextPath,
+    ...Object.fromEntries(
+      Object.entries(linuxPlatformConfig).filter(
+        ([key]) =>
+          !['platform_slug', 'buildArgs', 'selectedBuildArgs'].includes(key)
+      )
+    ),
     platform_slug: linuxPlatformConfig.platform_slug,
-    ci: linuxPlatformConfig.ci,
-    arch: linuxPlatformConfig.arch,
     buildArgs: buildArgs
   } as FinalizedLinuxPlatformConfig
 }
 
 export function validateWindowsPlatformConfig(
-  windowsPlatformConfig: WindowsPlatformConfig,
-  containerDefaults: ConfigDefaults
-): FinalizedWindowsPlatformConfig {
+  windowsPlatformConfig: PlatformConfig,
+  containerDefaults: ConfigDefaults,
+  repositories: {
+    [key: string]: RepositoryConfig
+  }
+): FinalizedPlatformConfig {
   // validate base platform config
   windowsPlatformConfig = validatePlatformConfig(
     windowsPlatformConfig,
-    containerDefaults
+    containerDefaults,
+    repositories
   )
 
   // filter build args by windowsPlatformConfig.selectedBuildArgs
@@ -342,22 +454,13 @@ export function validateWindowsPlatformConfig(
   )
 
   return {
-    containerfilePath: windowsPlatformConfig.containerfilePath,
-    contextPath: windowsPlatformConfig.contextPath,
-    arch: windowsPlatformConfig.arch,
-    ci: windowsPlatformConfig.ci,
+    ...Object.fromEntries(
+      Object.entries(windowsPlatformConfig).filter(
+        ([key]) => !['buildArgs', 'selectedBuildArgs'].includes(key)
+      )
+    ),
     buildArgs: buildArgs
-  } as FinalizedWindowsPlatformConfig
-}
-
-export interface ContainerConfig {
-  default: ConfigDefaults
-  linuxPlatforms?: {
-    [key: string]: LinuxPlatformConfig
-  }
-  windowsPlatforms?: {
-    [key: string]: WindowsPlatformConfig
-  }
+  } as FinalizedPlatformConfig
 }
 
 export interface FinalizedContainerConfig {
@@ -365,13 +468,20 @@ export interface FinalizedContainerConfig {
     [key: string]: FinalizedLinuxPlatformConfig
   }
   windowsPlatforms?: {
-    [key: string]: WindowsPlatformConfig
+    [key: string]: FinalizedPlatformConfig
   }
+}
+
+export interface ContainerConfig extends FinalizedContainerConfig {
+  default: ConfigDefaults
 }
 
 export function validateContainerConfig(
   containerConfig: ContainerConfig,
-  containerDefaults: ConfigDefaults
+  containerDefaults: ConfigDefaults,
+  repositories: {
+    [key: string]: RepositoryConfig
+  }
 ): FinalizedContainerConfig {
   core.debug('Validating container config')
 
@@ -388,7 +498,6 @@ export function validateContainerConfig(
     containerConfig.default?.containerfilePath ||
     containerDefaults?.containerfilePath
 
-  core.debug('Made it to containerConfig.default.containerfilePath')
   containerConfig.default.contextPath =
     containerConfig.default?.contextPath || containerDefaults?.contextPath
 
@@ -403,6 +512,21 @@ export function validateContainerConfig(
     ...(containerDefaults.buildArgs || {})
   }
 
+  containerConfig.default.platformTagTemplates =
+    containerConfig.default.platformTagTemplates ||
+    containerDefaults?.platformTagTemplates ||
+    []
+
+  containerConfig.default.manifestTagTemplates =
+    containerConfig.default.manifestTagTemplates ||
+    containerDefaults?.manifestTagTemplates ||
+    []
+
+  containerConfig.default.selectedRepositories =
+    containerConfig.default.selectedRepositories ||
+    containerDefaults?.selectedRepositories ||
+    []
+
   core.debug('Validating linux platforms')
 
   // check that linuxPlatforms is an object, and if its empty, set to containerDefaults.linuxPlatforms
@@ -410,7 +534,8 @@ export function validateContainerConfig(
     for (const [key, value] of Object.entries(containerConfig.linuxPlatforms)) {
       containerConfig.linuxPlatforms[key] = validateLinuxPlatformConfig(
         value,
-        containerConfig.default
+        containerConfig.default,
+        repositories
       )
     }
   }
@@ -424,7 +549,8 @@ export function validateContainerConfig(
     )) {
       containerConfig.windowsPlatforms[key] = validateWindowsPlatformConfig(
         value,
-        containerConfig.default
+        containerConfig.default,
+        repositories
       )
     }
   }
@@ -442,6 +568,9 @@ export interface Config {
   containers: {
     [key: string]: ContainerConfig
   }
+  repositories?: {
+    [key: string]: RepositoryConfig
+  }
 }
 
 export function validateConfig(config: Config): FinalizedContainerConfig {
@@ -453,32 +582,28 @@ export function validateConfig(config: Config): FinalizedContainerConfig {
   // check that default is a ConfigDefaults, and if its empty, set to configDefaults
   config.default = validateConfigDefaults(config.default || {}, {})
 
+  if (config.repositories) {
+    for (const [key, value] of Object.entries(config.repositories)) {
+      config.repositories[key] = validateRepositoryConfig(value)
+    }
+  } else {
+    config.repositories = {}
+  }
+
   const finalizedContainers: { [key: string]: FinalizedContainerConfig } = {}
 
   // check that containers is an object, and if its empty, set to configDefaults.containers
   if (config.containers) {
     for (const [key, value] of Object.entries(config.containers)) {
-      finalizedContainers[key] = validateContainerConfig(value, config.default)
+      finalizedContainers[key] = validateContainerConfig(
+        value,
+        config.default,
+        config.repositories
+      )
     }
   }
 
   return finalizedContainers
-}
-
-export async function populateConfig(
-  config: FinalizedContainerConfig
-): Promise<FinalizedContainerConfig> {
-  const jsonConfig = JSON.stringify(config)
-
-  const templateFunction = Handlebars.compile(jsonConfig)
-
-  const gitProjectRoot = await getGitProjectRoot()
-
-  const populatedConfig = templateFunction({
-    GIT_PROJECT_ROOT: gitProjectRoot
-  })
-
-  return JSON.parse(populatedConfig) as FinalizedContainerConfig
 }
 
 export async function getConfigFromJSON(
@@ -486,5 +611,5 @@ export async function getConfigFromJSON(
 ): Promise<FinalizedContainerConfig> {
   const validatedConfig = validateConfig(config)
 
-  return await populateConfig(validatedConfig)
+  return validatedConfig
 }
