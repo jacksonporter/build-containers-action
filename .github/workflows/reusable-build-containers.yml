@@ -41,6 +41,10 @@ on:
       post-build-command:
         type: string
         description: The command to run after the build
+      build-output-artifact-name-prefix:
+        type: string
+        description: The prefix to use for the build output artifact
+        default: 'build-containers-action-build-output'
 
 jobs:
   generate-matrix:
@@ -66,6 +70,10 @@ jobs:
         steps.build-containers-action-matrix-generation.outputs.linuxMatrix}}
 
   build-linux:
+    if:
+      needs.generate-matrix.outputs.linuxMatrix != '' &&
+      needs.generate-matrix.outputs.linuxMatrix != null &&
+      needs.generate-matrix.outputs.linuxMatrix != '{}'
     needs:
       - generate-matrix
     strategy:
@@ -117,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: matrix.ci.useBuildkit == true
         with:
-          name: build-containers-action-build-output-${{ matrix.job }}
+          name: ${{ inputs.build-output-artifact-name-prefix }}-${{ matrix.job }}
           path:
             ${{
             steps.build-containers-action-build-buildkit.outputs.build-output-json-path
@@ -140,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: matrix.ci.useBuildkit == false
         with:
-          name: build-containers-action-build-output-${{ matrix.job }}
+          name: ${{ inputs.build-output-artifact-name-prefix }}-${{ matrix.job }}
           path:
             ${{
             steps.build-containers-action-build.outputs.build-output-json-path
@@ -153,6 +161,10 @@ jobs:
           ${{ inputs.post-build-command }}
 
   build-windows:
+    if:
+      needs.generate-matrix.outputs.windowsMatrix != '' &&
+      needs.generate-matrix.outputs.windowsMatrix != null &&
+      needs.generate-matrix.outputs.windowsMatrix != '{}'
     needs:
       - generate-matrix
     strategy:
@@ -206,3 +218,21 @@ jobs:
         if: inputs.post-build-command != ''
         run: |
           ${{ inputs.post-build-command }}
+
+  combine-manifest:
+    needs:
+      - build-linux
+      - build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Test
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tree
+          tree
