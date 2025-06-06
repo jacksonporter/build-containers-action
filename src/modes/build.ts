@@ -201,6 +201,24 @@ export async function buildMode(): Promise<ModeReturn> {
     ARCH: jobIncludeConfig.arch || process.arch
   }
 
+  const buildName =
+    jobIncludeConfig.job || core.getInput('build-name') || 'build'
+
+  // Start building the summary
+  let summary = `# 🐳 ${buildName} Container Build Summary\n\n`
+  summary += `## 📋 Build Configuration\n\n`
+  summary += `| Setting | Value |\n`
+  summary += `|---------|-------|\n`
+  summary += `| 🏷️ Job Name | \`${buildName}\` |\n`
+  summary += `| 📦 Container Name | \`${jobIncludeConfig.containerName}\` |\n`
+  summary += `| 💻 Architecture | \`${jobIncludeConfig.arch || process.arch}\` |\n`
+  if (jobIncludeConfig.target) {
+    summary += `| 🎯 Target | \`${jobIncludeConfig.target}\` |\n`
+  }
+  if (jobIncludeConfig.platform_slug) {
+    summary += `| 🌐 Platform | \`${jobIncludeConfig.platform_slug}\` |\n`
+  }
+
   // populate tags
   const populatedPlatformTags =
     jobIncludeConfig.platformTagTemplates?.map((template) => {
@@ -212,12 +230,14 @@ export async function buildMode(): Promise<ModeReturn> {
   }
 
   const fullTags = []
+  const registryLogins = []
 
   for await (const loginResult of loginToRepositories(
     jobIncludeConfig,
     templateValues
   )) {
     core.info(`Logged in to ${loginResult.repository.registry}`)
+    registryLogins.push(loginResult.repository.registry)
 
     for (const tag of generateTags(
       loginResult.repository,
@@ -227,29 +247,92 @@ export async function buildMode(): Promise<ModeReturn> {
     }
   }
 
+  if (registryLogins.length > 0) {
+    summary += `\n## 🔐 Registry Login\n\n`
+    summary += `| Status | Registry |\n`
+    summary += `|--------|----------|\n`
+    for (const registry of registryLogins) {
+      summary += `| ✅ Success | \`${registry}\` |\n`
+    }
+  }
+
+  summary += `\n## 🏷️ Generated Tags\n\n`
+  summary += `| Tag |\n`
+  summary += `|-----|\n`
+  for (const tag of fullTags) {
+    summary += `| \`${tag}\` |\n`
+  }
+
   const buildArgs = generateBuildArgs(jobIncludeConfig.buildArgs || {})
 
-  const builtTag = buildContainer(
-    jobIncludeConfig.containerfilePath
-      ? Handlebars.compile(jobIncludeConfig.containerfilePath)(templateValues)
-      : 'Dockerfile',
-    jobIncludeConfig.contextPath
-      ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
-      : '.',
-    buildArgs,
-    fullTags[0],
-    jobIncludeConfig.target || null,
-    jobIncludeConfig.platform_slug || null
-  )
+  let buildError: Error | null = null
 
-  addOtherTags(builtTag, fullTags)
-  pushTags(fullTags)
+  try {
+    const builtTag = buildContainer(
+      jobIncludeConfig.containerfilePath
+        ? Handlebars.compile(jobIncludeConfig.containerfilePath)(templateValues)
+        : 'Dockerfile',
+      jobIncludeConfig.contextPath
+        ? Handlebars.compile(jobIncludeConfig.contextPath)(templateValues)
+        : '.',
+      buildArgs,
+      fullTags[0],
+      jobIncludeConfig.target || null,
+      jobIncludeConfig.platform_slug || null
+    )
 
-  core.info(`Build complete: ${builtTag}`)
+    addOtherTags(builtTag, fullTags)
+    pushTags(fullTags)
 
-  return {
-    buildOutput: {
-      temp: JSON.stringify(jobIncludeConfig, null, 2)
+    core.info(`Build complete: ${builtTag}`)
+
+    summary += `\n## 🚀 Build Results\n\n`
+    summary += `| Metric | Value |\n`
+    summary += `|--------|-------|\n`
+    summary += `| 🏆 Primary Tag | \`${builtTag}\` |\n`
+    summary += `| 📊 Total Tags | ${fullTags.length} |\n`
+    summary += `| ✅ Build Status | Success |\n`
+
+    if (core.getInput('skip-step-summary') === 'false') {
+      // Write the summary
+      await core.summary.addRaw(summary).write()
     }
-  } as ModeReturn
+
+    return {
+      buildOutput: {
+        temp: JSON.stringify(
+          {
+            summary,
+            config: jobIncludeConfig,
+            buildInfo: {
+              primaryTag: builtTag,
+              totalTags: fullTags.length,
+              tags: fullTags,
+              buildArgs,
+              target: jobIncludeConfig.target,
+              platform: jobIncludeConfig.platform_slug
+            }
+          },
+          null,
+          2
+        )
+      }
+    } as ModeReturn
+  } catch (error) {
+    buildError = error instanceof Error ? error : new Error(String(error))
+
+    summary += `\n## 🚀 Build Results\n\n`
+    summary += `| Metric | Value |\n`
+    summary += `|--------|-------|\n`
+    summary += `| ❌ Build Status | Failed |\n`
+    summary += `| 💥 Error | \`${buildError.message}\` |\n`
+
+    if (core.getInput('skip-step-summary') === 'false') {
+      // Write the summary
+      await core.summary.addRaw(summary).write()
+    }
+
+    // Re-throw the error to fail the job
+    throw buildError
+  }
 }

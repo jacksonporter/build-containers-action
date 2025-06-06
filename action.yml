@@ -35,10 +35,18 @@ inputs:
       - combine-build-outputs: Combine all build outputs into a single JSON object
     required: false
     default: 'build'
+  build-name:
+    description: The name of the build
+    required: false
+    default: 'build'
   build-output-artifact-name-prefix:
     description: The prefix to use for the build output artifact
     required: false
     default: 'build-containers-action-build-output'
+  skip-step-summary:
+    description: Whether to skip the step summary
+    required: false
+    default: 'false'
 
 # Define your outputs here.
 outputs:

@@ -71,9 +71,7 @@ jobs:
 
   build-linux:
     if:
-      needs.generate-matrix.outputs.linuxMatrix != '' &&
-      needs.generate-matrix.outputs.linuxMatrix != null &&
-      needs.generate-matrix.outputs.linuxMatrix != '{}'
+      needs.generate-matrix.outputs.linuxMatrix != null
     needs:
       - generate-matrix
     strategy:
@@ -151,9 +149,7 @@ jobs:
 
   build-windows:
     if:
-      needs.generate-matrix.outputs.windowsMatrix != '' &&
-      needs.generate-matrix.outputs.windowsMatrix != null &&
-      needs.generate-matrix.outputs.windowsMatrix != '{}'
+      needs.generate-matrix.outputs.windowsMatrix != null
     needs:
       - generate-matrix
     strategy:
