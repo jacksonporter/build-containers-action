@@ -8885,22 +8885,53 @@ async function generateMatrixMode() {
     };
 }
 
+async function combineBuildOutputsMode() {
+    coreExports.info('Combining build outputs...');
+    const workspace = process.env.GITHUB_WORKSPACE || '';
+    const combinedOutput = {};
+    const prefix = coreExports.getInput('build-output-artifact-name-prefix');
+    if (!prefix) {
+        throw new Error('build-output-artifact-name-prefix is required');
+    }
+    // Read all build output directories
+    const buildOutputDirs = fs
+        .readdirSync(workspace)
+        .filter((dir) => dir.startsWith(prefix));
+    for (const dir of buildOutputDirs) {
+        const buildOutputPath = require$$1.join(workspace, dir, 'buildOutput.json');
+        if (fs.existsSync(buildOutputPath)) {
+            const buildOutput = JSON.parse(fs.readFileSync(buildOutputPath, 'utf8'));
+            // Extract job name from directory name (remove prefix)
+            const jobName = dir.replace(prefix, '');
+            combinedOutput[jobName] = buildOutput;
+        }
+    }
+    return {
+        buildOutput: {
+            temp: JSON.stringify(combinedOutput, null, 2)
+        }
+    };
+}
+
 var InputMode;
 (function (InputMode) {
     InputMode["GENERATE_MATRIX"] = "generate-matrix";
     InputMode["BUILD"] = "build";
     InputMode["COMBINE_MANIFEST"] = "combine-manifest";
     InputMode["PUSH"] = "push";
+    InputMode["COMBINE_BUILD_OUTPUTS"] = "combine-build-outputs";
 })(InputMode || (InputMode = {}));
 async function startMode() {
     const mode = coreExports.getInput('mode');
     switch (mode) {
         case InputMode.GENERATE_MATRIX:
-            return await generateMatrixMode();
+            return generateMatrixMode();
         case InputMode.BUILD:
-            return await buildMode();
+            return buildMode();
+        case InputMode.COMBINE_BUILD_OUTPUTS:
+            return combineBuildOutputsMode();
         default:
-            throw new Error(`Invalid input mode: ${mode}`);
+            throw new Error(`Unknown mode: ${mode}`);
     }
 }
 

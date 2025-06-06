@@ -26,11 +26,19 @@ inputs:
     required: false
     default: 'toml'
   mode:
-    description:
-      The mode to run the action in, options are generate-matrix, build,
-      combine-manifest, and push
+    description: |
+      The mode to run the action in. Options are:
+      - generate-matrix: Generate the build matrix for the workflow
+      - build: Build the container images
+      - combine-manifest: Combine the manifests for multi-arch images
+      - push: Push the container images to the registry
+      - combine-build-outputs: Combine all build outputs into a single JSON object
     required: false
     default: 'build'
+  build-output-artifact-name-prefix:
+    description: The prefix to use for the build output artifact
+    required: false
+    default: 'build-containers-action-build-output'
 
 # Define your outputs here.
 outputs:

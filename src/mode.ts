@@ -3,23 +3,28 @@ import { FinalizedContainerConfig } from './config.js'
 import { FinalizedMatrixConfig } from './matrix.js'
 import { buildMode, BuildOutput } from './modes/build.js'
 import { generateMatrixMode } from './modes/generateMatrix.js'
+import { combineBuildOutputsMode } from './modes/combineBuildOutputs.js'
 
 export enum InputMode {
   GENERATE_MATRIX = 'generate-matrix',
   BUILD = 'build',
   COMBINE_MANIFEST = 'combine-manifest',
-  PUSH = 'push'
+  PUSH = 'push',
+  COMBINE_BUILD_OUTPUTS = 'combine-build-outputs'
 }
 
 export async function startMode(): Promise<ModeReturn> {
-  const mode = core.getInput('mode')
+  const mode = core.getInput('mode') as InputMode
+
   switch (mode) {
     case InputMode.GENERATE_MATRIX:
-      return await generateMatrixMode()
+      return generateMatrixMode()
     case InputMode.BUILD:
-      return await buildMode()
+      return buildMode()
+    case InputMode.COMBINE_BUILD_OUTPUTS:
+      return combineBuildOutputsMode()
     default:
-      throw new Error(`Invalid input mode: ${mode}`)
+      throw new Error(`Unknown mode: ${mode}`)
   }
 }
 

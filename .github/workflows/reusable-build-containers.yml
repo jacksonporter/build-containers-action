@@ -44,7 +44,7 @@ on:
       build-output-artifact-name-prefix:
         type: string
         description: The prefix to use for the build output artifact
-        default: 'build-containers-action-build-output'
+        default: 'build-containers-action-build-output-'
 
 jobs:
   generate-matrix:
@@ -121,17 +121,6 @@ jobs:
           config-file-format: 'json'
           mode: 'build'
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        if: matrix.ci.useBuildkit == true
-        with:
-          name: ${{ inputs.build-output-artifact-name-prefix }}-${{ matrix.job }}
-          path:
-            ${{
-            steps.build-containers-action-build-buildkit.outputs.build-output-json-path
-            }}
-          retention-days: 1
-
       - id: build-containers-action-build
         if: matrix.ci.useBuildkit == false
         uses: jacksonporter/build-containers-action@jp/v1dev
@@ -144,21 +133,21 @@ jobs:
           config-file-format: 'json'
           mode: 'build'
 
+      - name: Run post-build command
+        if: inputs.post-build-command != ''
+        run: |
+          ${{ inputs.post-build-command }}
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: matrix.ci.useBuildkit == false
         with:
-          name: ${{ inputs.build-output-artifact-name-prefix }}-${{ matrix.job }}
+          name: ${{ inputs.build-output-artifact-name-prefix }}${{ matrix.job }}
           path:
             ${{
             steps.build-containers-action-build.outputs.build-output-json-path
             }}
           retention-days: 1
-
-      - name: Run post-build command
-        if: inputs.post-build-command != ''
-        run: |
-          ${{ inputs.post-build-command }}
 
   build-windows:
     if:
@@ -204,20 +193,20 @@ jobs:
           config-file-format: 'json'
           mode: 'build'
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-containers-action-build-output-${{ matrix.job }}
-          path:
-            ${{
-            steps.build-containers-action-build.outputs.build-output-json-path
-            }}
-          retention-days: 1
-
       - name: Run post-build command
         if: inputs.post-build-command != ''
         run: |
           ${{ inputs.post-build-command }}
+
+          - name: Upload artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ inputs.build-output-artifact-name-prefix }}${{ matrix.job }}
+            path:
+              ${{
+              steps.build-containers-action-build.outputs.build-output-json-path
+              }}
+            retention-days: 1
 
   combine-manifest:
     needs:
@@ -231,8 +220,25 @@ jobs:
           fetch-depth: 0
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-      - name: Test
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tree
-          tree
+      - id: combine-build-outputs
+        uses: jacksonporter/build-containers-action@jp/v1dev
+        with:
+          mode: combine-build-outputs
+          build-output-artifact-name-prefix:
+            ${{ inputs.build-output-artifact-name-prefix }}
+
+    outputs:
+      build-output-json:
+        ${{ steps.combine-build-outputs.outputs.build-output-json }}
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - combine-manifest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          echo ${{ needs.combine-manifest.outputs.build-output-json }}
