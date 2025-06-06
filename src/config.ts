@@ -543,30 +543,42 @@ export function validateContainerConfig(
 
   core.debug('Validating linux platforms')
 
-  // check that linuxPlatforms is an object, and if its empty, set to containerDefaults.linuxPlatforms
-  if (containerConfig.linuxPlatforms) {
-    for (const [key, value] of Object.entries(containerConfig.linuxPlatforms)) {
-      containerConfig.linuxPlatforms[key] = validateLinuxPlatformConfig(
-        value,
-        containerConfig.default,
-        repositories
-      )
-    }
+  // Initialize platforms if they don't exist
+  if (!containerConfig.linuxPlatforms) {
+    containerConfig.linuxPlatforms = {}
+  }
+  if (!containerConfig.windowsPlatforms) {
+    containerConfig.windowsPlatforms = {}
+  }
+
+  // Validate linux platforms
+  for (const [key, value] of Object.entries(containerConfig.linuxPlatforms)) {
+    containerConfig.linuxPlatforms[key] = validateLinuxPlatformConfig(
+      value,
+      containerConfig.default,
+      repositories
+    )
   }
 
   core.debug('Validating windows platforms')
 
-  // check that windowsPlatforms is an object, and if its empty, set to containerDefaults.windowsPlatforms
-  if (containerConfig.windowsPlatforms) {
-    for (const [key, value] of Object.entries(
-      containerConfig.windowsPlatforms
-    )) {
-      containerConfig.windowsPlatforms[key] = validateWindowsPlatformConfig(
-        value,
-        containerConfig.default,
-        repositories
-      )
-    }
+  // Validate windows platforms
+  for (const [key, value] of Object.entries(containerConfig.windowsPlatforms)) {
+    containerConfig.windowsPlatforms[key] = validateWindowsPlatformConfig(
+      value,
+      containerConfig.default,
+      repositories
+    )
+  }
+
+  // Ensure at least one platform exists
+  if (
+    Object.keys(containerConfig.linuxPlatforms).length === 0 &&
+    Object.keys(containerConfig.windowsPlatforms).length === 0
+  ) {
+    throw new Error(
+      'At least one platform (linux or windows) must be specified'
+    )
   }
 
   const finalizedContainerConfig: FinalizedContainerConfig = {
