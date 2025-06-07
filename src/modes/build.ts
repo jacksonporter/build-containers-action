@@ -213,6 +213,7 @@ export async function buildMode(): Promise<ModeReturn> {
   summary += `|---------|-------|\n`
   summary += `| 🏷️ Job Name | \`${buildName}\` |\n`
   summary += `| 📦 Container Name | \`${jobIncludeConfig.containerName}\` |\n`
+  summary += `| 💻 Builder OS | \`${process.platform}\` |\n`
   summary += `| 💻 Builder Architecture | \`${process.arch}\` |\n`
   if (jobIncludeConfig.target) {
     summary += `| 🎯 Target | \`${jobIncludeConfig.target}\` |\n`
@@ -304,7 +305,6 @@ export async function buildMode(): Promise<ModeReturn> {
       buildOutput: {
         temp: JSON.stringify(
           {
-            summary,
             config: jobIncludeConfig,
             buildInfo: {
               primaryTag: builtTag,
@@ -312,7 +312,9 @@ export async function buildMode(): Promise<ModeReturn> {
               tags: fullTags,
               buildArgs,
               target: jobIncludeConfig.target,
-              platform: jobIncludeConfig.platform_slug
+              platform: jobIncludeConfig.platform_slug,
+              builderOS: process.platform,
+              builderArch: process.arch
             }
           },
           null,

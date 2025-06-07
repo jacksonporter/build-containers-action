@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { startMode } from './mode.js'
+import { InputMode, startMode } from './mode.js'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -31,7 +31,10 @@ export async function run(): Promise<void> {
       core.info(`Job matrix: ${JSON.stringify(modeReturn.jobMatrix, null, 2)}`)
     } else {
       core.setOutput('jobMatrix', '{}')
-      core.warning('jobMatrix is empty')
+
+      if (core.getInput('mode') === InputMode.GENERATE_MATRIX) {
+        core.warning('jobMatrix is empty')
+      }
     }
 
     if (modeReturn.buildOutput) {

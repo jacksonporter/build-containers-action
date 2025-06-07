@@ -8812,6 +8812,7 @@ async function buildMode() {
     summary += `|---------|-------|\n`;
     summary += `| 🏷️ Job Name | \`${buildName}\` |\n`;
     summary += `| 📦 Container Name | \`${jobIncludeConfig.containerName}\` |\n`;
+    summary += `| 💻 Builder OS | \`${process.platform}\` |\n`;
     summary += `| 💻 Builder Architecture | \`${process.arch}\` |\n`;
     if (jobIncludeConfig.target) {
         summary += `| 🎯 Target | \`${jobIncludeConfig.target}\` |\n`;
@@ -8873,7 +8874,6 @@ async function buildMode() {
         return {
             buildOutput: {
                 temp: JSON.stringify({
-                    summary,
                     config: jobIncludeConfig,
                     buildInfo: {
                         primaryTag: builtTag,
@@ -8881,7 +8881,9 @@ async function buildMode() {
                         tags: fullTags,
                         buildArgs,
                         target: jobIncludeConfig.target,
-                        platform: jobIncludeConfig.platform_slug
+                        platform: jobIncludeConfig.platform_slug,
+                        builderOS: process.platform,
+                        builderArch: process.arch
                     }
                 }, null, 2)
             }
@@ -9038,7 +9040,9 @@ async function run() {
         }
         else {
             coreExports.setOutput('jobMatrix', '{}');
-            coreExports.warning('jobMatrix is empty');
+            if (coreExports.getInput('mode') === InputMode.GENERATE_MATRIX) {
+                coreExports.warning('jobMatrix is empty');
+            }
         }
         if (modeReturn.buildOutput) {
             coreExports.setOutput('build-output-json', JSON.stringify(modeReturn.buildOutput));
