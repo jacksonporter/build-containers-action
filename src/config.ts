@@ -326,7 +326,6 @@ export interface FinalizedPlatformConfig {
     [key: string]: BuildArgConfig
   }
   platformTagTemplates?: string[]
-  manifestTagTemplates?: string[]
   repositories?: {
     [key: string]: RepositoryConfig
   }
@@ -359,6 +358,14 @@ export function validatePlatformConfig(
     throw new Error('platformConfig must be an object')
   }
 
+  // Remove manifestTagTemplates if it exists at platform level
+  if ('manifestTagTemplates' in platformConfig) {
+    core.warning(
+      'manifestTagTemplates should not be defined at platform level - it will be ignored'
+    )
+    delete platformConfig.manifestTagTemplates
+  }
+
   let platformConfigDefaults: ConfigDefaults = {
     containerfilePath: platformConfig?.containerfilePath,
     contextPath: platformConfig.contextPath,
@@ -367,7 +374,6 @@ export function validatePlatformConfig(
     ci: platformConfig.ci,
     buildArgs: platformConfig.buildArgs,
     platformTagTemplates: platformConfig.platformTagTemplates,
-    manifestTagTemplates: platformConfig.manifestTagTemplates,
     selectedRepositories: platformConfig.selectedRepositories
   }
 
@@ -384,8 +390,6 @@ export function validatePlatformConfig(
   platformConfig.buildArgs = platformConfigDefaults.buildArgs
   platformConfig.platformTagTemplates =
     platformConfigDefaults.platformTagTemplates
-  platformConfig.manifestTagTemplates =
-    platformConfigDefaults.manifestTagTemplates
   platformConfig.repositories = {}
 
   for (const repository of platformConfigDefaults.selectedRepositories || []) {

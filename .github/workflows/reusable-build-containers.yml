@@ -163,14 +163,20 @@ jobs:
       build-output-json:
         ${{ steps.combine-build-outputs.outputs.build-output-json }}
 
-  test:
-    runs-on: ubuntu-latest
+  combine-manifests:
     needs:
       - combine-build-outputs
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: |
-          echo '${{ needs.combine-build-outputs.outputs.build-output-json }}' | jq
+      - name: Run combine-manifests
+        uses: jacksonporter/build-containers-action@jp/v1dev
+        with:
+          mode: combine-manifests
+          config: ${{ inputs.config }}
+          config-file: ${{ inputs.config-file }}
+          config-file-format: ${{ inputs.config-file-format }}
+          build-outputs: ${{ needs.combine-build-outputs.outputs.build-output-json }}

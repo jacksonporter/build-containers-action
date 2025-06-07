@@ -9,10 +9,6 @@
     "{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}",
     "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}-{{ARCH}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}"
   ],
-  "manifestTagTemplates": [
-    "{{CONTAINER_NAME}}-{{env.GITHUB_RUN_ID}}-{{env.GITHUB_RUN_NUMBER}}",
-    "{{env.GITHUB_REF_NAME}}-{{CONTAINER_NAME}}"
-  ],
   "repositories": {},
   "arch": "amd64",
   "platform_slug": "linux/amd64",

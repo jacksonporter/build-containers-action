@@ -8503,6 +8503,11 @@ function validatePlatformConfig(platformConfig, containerDefaults, repositories)
     if (typeof platformConfig !== 'object') {
         throw new Error('platformConfig must be an object');
     }
+    // Remove manifestTagTemplates if it exists at platform level
+    if ('manifestTagTemplates' in platformConfig) {
+        coreExports.warning('manifestTagTemplates should not be defined at platform level - it will be ignored');
+        delete platformConfig.manifestTagTemplates;
+    }
     let platformConfigDefaults = {
         containerfilePath: platformConfig?.containerfilePath,
         contextPath: platformConfig.contextPath,
@@ -8511,7 +8516,6 @@ function validatePlatformConfig(platformConfig, containerDefaults, repositories)
         ci: platformConfig.ci,
         buildArgs: platformConfig.buildArgs,
         platformTagTemplates: platformConfig.platformTagTemplates,
-        manifestTagTemplates: platformConfig.manifestTagTemplates,
         selectedRepositories: platformConfig.selectedRepositories
     };
     platformConfigDefaults = validateConfigDefaults(platformConfigDefaults, containerDefaults);
@@ -8523,8 +8527,6 @@ function validatePlatformConfig(platformConfig, containerDefaults, repositories)
     platformConfig.buildArgs = platformConfigDefaults.buildArgs;
     platformConfig.platformTagTemplates =
         platformConfigDefaults.platformTagTemplates;
-    platformConfig.manifestTagTemplates =
-        platformConfigDefaults.manifestTagTemplates;
     platformConfig.repositories = {};
     for (const repository of platformConfigDefaults.selectedRepositories || []) {
         if (!repositories[repository]) {

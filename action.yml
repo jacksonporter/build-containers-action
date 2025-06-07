@@ -47,6 +47,10 @@ inputs:
     description: Whether to skip the step summary
     required: false
     default: 'false'
+  build-outputs:
+    description: Combined build outputs JSON for combine-manifests mode
+    required: false
+    default: ''
 
 # Define your outputs here.
 outputs:
