@@ -8998,7 +8998,7 @@ async function combineBuildOutputsMode() {
     };
 }
 
-async function combineManifestsMode() {
+async function createManifestMode() {
     const config = await getConfigFromJSON(JSON.parse(coreExports.getInput('config')));
     const buildOutputs = JSON.parse(coreExports.getInput('build-outputs'));
     const templateValues = {
@@ -9133,7 +9133,7 @@ var InputMode;
 (function (InputMode) {
     InputMode["GENERATE_MATRIX"] = "generate-matrix";
     InputMode["BUILD"] = "build";
-    InputMode["COMBINE_MANIFEST"] = "combine-manifest";
+    InputMode["CREATE_MANIFEST"] = "create-manifest";
     InputMode["PUSH"] = "push";
     InputMode["COMBINE_BUILD_OUTPUTS"] = "combine-build-outputs";
 })(InputMode || (InputMode = {}));
@@ -9146,8 +9146,8 @@ async function startMode() {
             return buildMode();
         case InputMode.COMBINE_BUILD_OUTPUTS:
             return combineBuildOutputsMode();
-        case InputMode.COMBINE_MANIFEST:
-            return combineManifestsMode();
+        case InputMode.CREATE_MANIFEST:
+            return createManifestMode();
         default:
             throw new Error(`Unknown mode: ${mode}`);
     }

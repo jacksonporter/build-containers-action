@@ -14,7 +14,7 @@ interface TemplateValues {
   CONTAINER_NAME?: string
 }
 
-export async function combineManifestsMode(): Promise<ModeReturn> {
+export async function createManifestMode(): Promise<ModeReturn> {
   const config = await getConfigFromJSON(JSON.parse(core.getInput('config')))
   const buildOutputs = JSON.parse(
     core.getInput('build-outputs')
@@ -106,7 +106,7 @@ async function processContainer(
 
   // Create a JobInclude object for loginToRepositories
   const jobInclude: JobInclude = {
-    job: 'combine-manifests',
+    job: 'create-manifest',
     containerName,
     repositories
   }

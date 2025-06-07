@@ -4,12 +4,12 @@ import { FinalizedMatrixConfig } from './matrix.js'
 import { buildMode, BuildOutput } from './modes/build.js'
 import { generateMatrixMode } from './modes/generateMatrix.js'
 import { combineBuildOutputsMode } from './modes/combineBuildOutputs.js'
-import { combineManifestsMode } from './modes/combine-manifests.js'
+import { createManifestMode } from './modes/create-manifest.js'
 
 export enum InputMode {
   GENERATE_MATRIX = 'generate-matrix',
   BUILD = 'build',
-  COMBINE_MANIFEST = 'combine-manifest',
+  CREATE_MANIFEST = 'create-manifest',
   PUSH = 'push',
   COMBINE_BUILD_OUTPUTS = 'combine-build-outputs'
 }
@@ -24,8 +24,8 @@ export async function startMode(): Promise<ModeReturn> {
       return buildMode()
     case InputMode.COMBINE_BUILD_OUTPUTS:
       return combineBuildOutputsMode()
-    case InputMode.COMBINE_MANIFEST:
-      return combineManifestsMode()
+    case InputMode.CREATE_MANIFEST:
+      return createManifestMode()
     default:
       throw new Error(`Unknown mode: ${mode}`)
   }
