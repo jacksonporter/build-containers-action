@@ -100,24 +100,12 @@ jobs:
       - name: Set up Docker Buildx
         if: matrix.ci.useBuildkit == true
         uses: docker/setup-buildx-action@v3
-      - id: build-containers-action-build-buildkit
-        if: matrix.ci.useBuildkit == true
-        uses: jacksonporter/build-containers-action@jp/v1dev
-        env:
-          DOCKER_BUILDKIT: '1'
-          GITHUB_TOKEN: ${{ secrets.github-token }}
-        with:
-          config: |
-            ${{ toJson(matrix) }}
-          config-format: 'jobInclude'
-          config-file-format: 'json'
-          mode: 'build'
-          skip-step-summary: 'true'
 
       - id: build-containers-action-build
         if: matrix.ci.useBuildkit == false
         uses: jacksonporter/build-containers-action@jp/v1dev
         env:
+          DOCKER_BUILDKIT: ${{ matrix.ci.useBuildkit && '1' || '' }}
           GITHUB_TOKEN: ${{ secrets.github-token }}
         with:
           config: |
@@ -180,4 +168,5 @@ jobs:
           config: ${{ inputs.config }}
           config-file: ${{ inputs.config-file }}
           config-file-format: ${{ inputs.config-file-format }}
-          build-outputs: ${{ needs.combine-build-outputs.outputs.build-output-json }}
+          build-outputs:
+            ${{ needs.combine-build-outputs.outputs.build-output-json }}
