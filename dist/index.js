@@ -8873,19 +8873,17 @@ async function buildMode() {
         }
         return {
             buildOutput: {
-                temp: JSON.stringify({
-                    config: jobIncludeConfig,
-                    buildInfo: {
-                        primaryTag: builtTag,
-                        totalTags: fullTags.length,
-                        tags: fullTags,
-                        buildArgs,
-                        target: jobIncludeConfig.target,
-                        platform: jobIncludeConfig.platform_slug,
-                        builderOS: process.platform,
-                        builderArch: process.arch
-                    }
-                }, null, 2)
+                config: jobIncludeConfig,
+                buildInfo: {
+                    primaryTag: builtTag,
+                    totalTags: fullTags.length,
+                    tags: fullTags,
+                    buildArgs,
+                    target: jobIncludeConfig.target,
+                    platform: jobIncludeConfig.platform_slug,
+                    builderOS: process.platform,
+                    builderArch: process.arch
+                }
             }
         };
     }

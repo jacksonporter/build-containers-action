@@ -14,7 +14,17 @@ import {
 import { execSync } from 'child_process'
 
 export interface BuildOutput {
-  temp: string
+  config: JobInclude
+  buildInfo: {
+    primaryTag: string
+    totalTags: number
+    tags: string[]
+    buildArgs: Record<string, string>
+    target: string | null
+    platform: string | null
+    builderOS: string
+    builderArch: string
+  }
 }
 
 export async function* loginToRepositories(
@@ -303,23 +313,17 @@ export async function buildMode(): Promise<ModeReturn> {
 
     return {
       buildOutput: {
-        temp: JSON.stringify(
-          {
-            config: jobIncludeConfig,
-            buildInfo: {
-              primaryTag: builtTag,
-              totalTags: fullTags.length,
-              tags: fullTags,
-              buildArgs,
-              target: jobIncludeConfig.target,
-              platform: jobIncludeConfig.platform_slug,
-              builderOS: process.platform,
-              builderArch: process.arch
-            }
-          },
-          null,
-          2
-        )
+        config: jobIncludeConfig,
+        buildInfo: {
+          primaryTag: builtTag,
+          totalTags: fullTags.length,
+          tags: fullTags,
+          buildArgs,
+          target: jobIncludeConfig.target,
+          platform: jobIncludeConfig.platform_slug,
+          builderOS: process.platform,
+          builderArch: process.arch
+        }
       }
     } as ModeReturn
   } catch (error) {
