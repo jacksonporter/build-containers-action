@@ -8992,9 +8992,7 @@ async function combineBuildOutputsMode() {
         }
     }
     return {
-        buildOutput: {
-            temp: JSON.stringify(combinedOutput, null, 2)
-        }
+        buildOutput: combinedOutput
     };
 }
 

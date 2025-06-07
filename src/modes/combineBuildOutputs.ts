@@ -31,8 +31,6 @@ export async function combineBuildOutputsMode(): Promise<ModeReturn> {
   }
 
   return {
-    buildOutput: {
-      temp: JSON.stringify(combinedOutput, null, 2)
-    } as BuildOutput
+    buildOutput: combinedOutput as unknown as BuildOutput
   }
 }
