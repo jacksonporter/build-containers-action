@@ -9003,35 +9003,53 @@ async function combineBuildOutputsMode() {
 
 async function createManifestMode() {
     coreExports.info('🚀 Starting create-manifest mode');
-    const config = await getConfigFromJSON(JSON.parse(coreExports.getInput('config')));
-    coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
-    const buildOutputs = JSON.parse(coreExports.getInput('build-outputs'));
-    coreExports.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`);
-    const templateValues = {
-        env: process.env,
-        GIT_PROJECT_ROOT: await getGitProjectRoot()
-    };
-    coreExports.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`);
-    // Start building the summary
-    let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
-    summary += `## 📋 Manifest Configuration\n\n`;
-    // Process each container
-    for (const [containerName, containerConfig] of Object.entries(config)) {
-        coreExports.info(`\n🔄 Processing container: ${containerName}`);
-        // Filter build outputs for this container
-        const containerBuildOutputs = Object.values(buildOutputs).filter((output) => output.config.containerName === containerName);
-        coreExports.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`);
-        const containerSummary = await processContainer(containerName, containerConfig, containerBuildOutputs, templateValues);
-        summary += containerSummary;
+    try {
+        const config = await getConfigFromJSON(getRawConfig());
+        coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
+        const buildOutputsInput = coreExports.getInput('build-outputs');
+        coreExports.info('📦 Raw build outputs input received');
+        let buildOutputs;
+        try {
+            buildOutputs = JSON.parse(buildOutputsInput);
+            coreExports.info(`📦 Successfully parsed build outputs JSON`);
+        }
+        catch (error) {
+            coreExports.error(`❌ Failed to parse build outputs JSON: ${error}`);
+            coreExports.error(`📄 Build outputs input length: ${buildOutputsInput.length}`);
+            coreExports.error(`📄 First 100 characters of build outputs: ${buildOutputsInput.substring(0, 100)}`);
+            throw error;
+        }
+        coreExports.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`);
+        const templateValues = {
+            env: process.env,
+            GIT_PROJECT_ROOT: await getGitProjectRoot()
+        };
+        coreExports.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`);
+        // Start building the summary
+        let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
+        summary += `## 📋 Manifest Configuration\n\n`;
+        // Process each container
+        for (const [containerName, containerConfig] of Object.entries(config)) {
+            coreExports.info(`\n🔄 Processing container: ${containerName}`);
+            // Filter build outputs for this container
+            const containerBuildOutputs = Object.values(buildOutputs).filter((output) => output.config.containerName === containerName);
+            coreExports.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`);
+            const containerSummary = await processContainer(containerName, containerConfig, containerBuildOutputs, templateValues);
+            summary += containerSummary;
+        }
+        summary += '\n</details>';
+        if (coreExports.getInput('skip-step-summary') === 'false') {
+            coreExports.info('📝 Writing step summary');
+            // Write the summary
+            await coreExports.summary.addRaw(summary).write();
+        }
+        coreExports.info('✅ Create manifest mode completed successfully');
+        return {};
     }
-    summary += '\n</details>';
-    if (coreExports.getInput('skip-step-summary') === 'false') {
-        coreExports.info('📝 Writing step summary');
-        // Write the summary
-        await coreExports.summary.addRaw(summary).write();
+    catch (error) {
+        coreExports.error(`❌ Error in create-manifest mode: ${error}`);
+        throw error;
     }
-    coreExports.info('✅ Create manifest mode completed successfully');
-    return {};
 }
 async function processContainer(containerName, containerConfig, buildOutputs, templateValues) {
     coreExports.info(`\n📦 Starting manifest creation for container: ${containerName}`);
