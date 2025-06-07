@@ -34,6 +34,10 @@ on:
         type: boolean
         description: Whether to install Mise for the build
         default: false
+      enable-mise-cache:
+        type: boolean
+        description: Whether to enable Mise cache for the build
+        default: false
       pre-build-command:
         type: string
         description: The command to run before the build
@@ -88,6 +92,7 @@ jobs:
         with:
           experimental: true
           install: ${{ inputs.enable-mise-install }}
+          cache: ${{ inputs.enable-mise-cache }}
 
       - name: Run pre-build command
         if: inputs.pre-build-command != ''
@@ -167,5 +172,5 @@ jobs:
           config: ${{ inputs.config }}
           config-file: ${{ inputs.config-file }}
           config-file-format: ${{ inputs.config-file-format }}
-          build-outputs:
+          build-outputs: |
             ${{ needs.combine-build-outputs.outputs.build-output-json }}
