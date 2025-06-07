@@ -26,22 +26,12 @@ export async function run(): Promise<void> {
       )
     }
 
-    if (modeReturn.linuxMatrix) {
-      core.setOutput('linuxMatrix', JSON.stringify(modeReturn.linuxMatrix))
-      core.info(
-        `Linux matrix: ${JSON.stringify(modeReturn.linuxMatrix, null, 2)}`
-      )
+    if (modeReturn.jobMatrix) {
+      core.setOutput('jobMatrix', JSON.stringify(modeReturn.jobMatrix))
+      core.info(`Job matrix: ${JSON.stringify(modeReturn.jobMatrix, null, 2)}`)
     } else {
-      core.setOutput('linuxMatrix', '{}')
-    }
-
-    if (modeReturn.windowsMatrix) {
-      core.setOutput('windowsMatrix', JSON.stringify(modeReturn.windowsMatrix))
-      core.info(
-        `Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`
-      )
-    } else {
-      core.setOutput('windowsMatrix', '{}')
+      core.setOutput('jobMatrix', '{}')
+      core.warning('jobMatrix is empty')
     }
 
     if (modeReturn.buildOutput) {

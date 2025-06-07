@@ -52,10 +52,8 @@ inputs:
 outputs:
   finalizedContainerConfig:
     description: The finalized container config
-  linuxMatrix:
-    description: The linux matrix for the build
-  windowsMatrix:
-    description: The windows matrix for the build
+  jobMatrix:
+    description: The job matrix for the build
   build-output-json:
     description: The build output for the build in JSON format
   build-output-json-path:

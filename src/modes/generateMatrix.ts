@@ -28,7 +28,12 @@ export async function generateMatrixMode(): Promise<ModeReturn> {
 
   return {
     finalizedContainerConfig,
-    linuxMatrix,
-    windowsMatrix
+    jobMatrix: {
+      job: [...(linuxMatrix?.job || []), ...(windowsMatrix?.job || [])],
+      include: [
+        ...(linuxMatrix?.include || []),
+        ...(windowsMatrix?.include || [])
+      ]
+    }
   }
 }

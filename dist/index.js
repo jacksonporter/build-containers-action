@@ -8960,8 +8960,13 @@ async function generateMatrixMode() {
     const windowsMatrix = buildWindowsMatrixFromFinalizedContainerConfig(finalizedContainerConfig);
     return {
         finalizedContainerConfig,
-        linuxMatrix,
-        windowsMatrix
+        jobMatrix: {
+            job: [...(linuxMatrix?.job || []), ...(windowsMatrix?.job || [])],
+            include: [
+                ...(linuxMatrix?.include || []),
+                ...(windowsMatrix?.include || [])
+            ]
+        }
     };
 }
 
@@ -9027,19 +9032,13 @@ async function run() {
             coreExports.setOutput('finalizedContainerConfig', JSON.stringify(modeReturn.finalizedContainerConfig));
             coreExports.info(`Finalized container config: ${JSON.stringify(modeReturn.finalizedContainerConfig, null, 2)}`);
         }
-        if (modeReturn.linuxMatrix) {
-            coreExports.setOutput('linuxMatrix', JSON.stringify(modeReturn.linuxMatrix));
-            coreExports.info(`Linux matrix: ${JSON.stringify(modeReturn.linuxMatrix, null, 2)}`);
+        if (modeReturn.jobMatrix) {
+            coreExports.setOutput('jobMatrix', JSON.stringify(modeReturn.jobMatrix));
+            coreExports.info(`Job matrix: ${JSON.stringify(modeReturn.jobMatrix, null, 2)}`);
         }
         else {
-            coreExports.setOutput('linuxMatrix', '{}');
-        }
-        if (modeReturn.windowsMatrix) {
-            coreExports.setOutput('windowsMatrix', JSON.stringify(modeReturn.windowsMatrix));
-            coreExports.info(`Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`);
-        }
-        else {
-            coreExports.setOutput('windowsMatrix', '{}');
+            coreExports.setOutput('jobMatrix', '{}');
+            coreExports.warning('jobMatrix is empty');
         }
         if (modeReturn.buildOutput) {
             coreExports.setOutput('build-output-json', JSON.stringify(modeReturn.buildOutput));
