@@ -8801,7 +8801,7 @@ async function buildMode() {
         env: process.env,
         GIT_PROJECT_ROOT: await getGitProjectRoot(),
         CONTAINER_NAME: jobIncludeConfig.containerName,
-        PLATFORM: jobIncludeConfig.platform_slug || process.platform,
+        PLATFORM: jobIncludeConfig.platform_slug?.replace('/', '-') || process.platform,
         ARCH: jobIncludeConfig.arch || process.arch
     };
     const buildName = jobIncludeConfig.job || coreExports.getInput('build-name') || 'build';
