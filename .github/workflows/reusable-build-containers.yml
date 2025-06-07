@@ -62,18 +62,14 @@ jobs:
           config-file-format: ${{ inputs.config-file-format }}
           mode: generate-matrix
     outputs:
-      windowsMatrix:
-        ${{
-        steps.build-containers-action-matrix-generation.outputs.windowsMatrix}}
-      linuxMatrix:
-        ${{
-        steps.build-containers-action-matrix-generation.outputs.linuxMatrix}}
+      jobMatrix:
+        ${{ steps.build-containers-action-matrix-generation.outputs.jobMatrix}}
 
-  build-linux:
+  build:
     needs:
       - generate-matrix
     strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.linuxMatrix) }}
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.jobMatrix) }}
       fail-fast: false
     runs-on: ${{ matrix.ci.defaultRunnerLabels }}
     permissions:
@@ -145,65 +141,9 @@ jobs:
             }}
           retention-days: 1
 
-  build-windows:
+  combine-build-outputs:
     needs:
-      - generate-matrix
-    strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.windowsMatrix) }}
-      fail-fast: false
-    runs-on: ${{ matrix.ci.defaultRunnerLabels }}
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Mise
-        uses: jdx/mise-action@v2
-        if: inputs.enable-mise-configuration == true
-        with:
-          experimental: true
-          install: ${{ inputs.enable-mise-install }}
-
-      - name: Run pre-build command
-        if: inputs.pre-build-command != ''
-        run: |
-          ${{ inputs.pre-build-command }}
-
-      - id: build-containers-action-build
-        uses: jacksonporter/build-containers-action@jp/v1dev
-        env:
-          GITHUB_TOKEN: ${{ secrets.github-token }}
-        with:
-          config: |
-            ${{ toJson(matrix) }}
-          config-format: 'jobInclude'
-          config-file-format: 'json'
-          mode: 'build'
-
-      - name: Run post-build command
-        if: inputs.post-build-command != ''
-        run: |
-          ${{ inputs.post-build-command }}
-
-          - name: Upload artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: ${{ inputs.build-output-artifact-name-prefix }}${{ matrix.job }}
-            path:
-              ${{
-              steps.build-containers-action-build.outputs.build-output-json-path
-              }}
-            retention-days: 1
-
-  combine-manifest:
-    needs:
-      - build-linux
-      - build-windows
+      - build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

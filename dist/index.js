@@ -8806,7 +8806,7 @@ async function buildMode() {
     };
     const buildName = jobIncludeConfig.job || coreExports.getInput('build-name') || 'build';
     // Start building the summary
-    let summary = `# 🐳 ${buildName} Container Build Summary\n\n`;
+    let summary = `<details>\n<summary>🐳 ${buildName} Container Build Summary (click to expand for details)</summary>\n\n`;
     summary += `## 📋 Build Configuration\n\n`;
     summary += `| Setting | Value |\n`;
     summary += `|---------|-------|\n`;
@@ -8868,7 +8868,7 @@ async function buildMode() {
         summary += `| ✅ Build Status | Success |\n`;
         if (coreExports.getInput('skip-step-summary') === 'false') {
             // Write the summary
-            await coreExports.summary.addRaw(summary).write();
+            await coreExports.summary.addRaw(summary + '\n</details>').write();
         }
         return {
             buildOutput: {
@@ -8896,7 +8896,7 @@ async function buildMode() {
         summary += `| 💥 Error | \`${buildError.message}\` |\n`;
         if (coreExports.getInput('skip-step-summary') === 'false') {
             // Write the summary
-            await coreExports.summary.addRaw(summary).write();
+            await coreExports.summary.addRaw(summary + '\n</details>').write();
         }
         // Re-throw the error to fail the job
         throw buildError;
