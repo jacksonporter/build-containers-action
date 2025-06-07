@@ -8875,7 +8875,10 @@ async function buildMode() {
         }
         return {
             buildOutput: {
-                config: jobIncludeConfig,
+                config: {
+                    ...jobIncludeConfig,
+                    containerName: jobIncludeConfig.containerName
+                },
                 buildInfo: {
                     primaryTag: builtTag,
                     totalTags: fullTags.length,
@@ -8999,28 +9002,39 @@ async function combineBuildOutputsMode() {
 }
 
 async function createManifestMode() {
+    coreExports.info('🚀 Starting create-manifest mode');
     const config = await getConfigFromJSON(JSON.parse(coreExports.getInput('config')));
+    coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
     const buildOutputs = JSON.parse(coreExports.getInput('build-outputs'));
+    coreExports.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`);
     const templateValues = {
         env: process.env,
         GIT_PROJECT_ROOT: await getGitProjectRoot()
     };
+    coreExports.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`);
     // Start building the summary
     let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
     summary += `## 📋 Manifest Configuration\n\n`;
     // Process each container
     for (const [containerName, containerConfig] of Object.entries(config)) {
-        const containerSummary = await processContainer(containerName, containerConfig, buildOutputs, templateValues);
+        coreExports.info(`\n🔄 Processing container: ${containerName}`);
+        // Filter build outputs for this container
+        const containerBuildOutputs = Object.values(buildOutputs).filter((output) => output.config.containerName === containerName);
+        coreExports.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`);
+        const containerSummary = await processContainer(containerName, containerConfig, containerBuildOutputs, templateValues);
         summary += containerSummary;
     }
     summary += '\n</details>';
     if (coreExports.getInput('skip-step-summary') === 'false') {
+        coreExports.info('📝 Writing step summary');
         // Write the summary
         await coreExports.summary.addRaw(summary).write();
     }
+    coreExports.info('✅ Create manifest mode completed successfully');
     return {};
 }
 async function processContainer(containerName, containerConfig, buildOutputs, templateValues) {
+    coreExports.info(`\n📦 Starting manifest creation for container: ${containerName}`);
     let summary = `### 📦 Container: ${containerName}\n\n`;
     // Get all primary tags from build outputs
     const primaryTags = buildOutputs
@@ -9029,17 +9043,20 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     if (primaryTags.length === 0) {
         throw new Error(`No primary tags found for container ${containerName}`);
     }
+    coreExports.info(`🏷️ Found ${primaryTags.length} primary tags`);
     // Get manifest tag templates
     const manifestTagTemplates = containerConfig.default?.manifestTagTemplates || [];
     if (manifestTagTemplates.length === 0) {
         throw new Error(`No manifest tag templates found for container ${containerName}`);
     }
+    coreExports.info(`📝 Found ${manifestTagTemplates.length} manifest tag templates`);
     // Add container info to template values
     templateValues.CONTAINER_NAME = containerName;
     // Populate manifest tags
     const manifestTags = manifestTagTemplates.map((template) => {
         return libExports$1.compile(template)(templateValues);
     });
+    coreExports.info(`✨ Generated ${manifestTags.length} manifest tags`);
     // Get repositories from the first platform that has them
     let repositories = {};
     if (containerConfig.linuxPlatforms) {
@@ -9059,14 +9076,16 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
             }
         }
     }
+    coreExports.info(`🔑 Found ${Object.keys(repositories).length} repositories to authenticate with`);
     // Create a JobInclude object for loginToRepositories
     const jobInclude = {
         repositories
     };
     // Login to repositories
+    coreExports.info('🔐 Starting registry authentication');
     const registryLogins = [];
     for await (const loginResult of loginToRepositories(jobInclude, templateValues)) {
-        coreExports.info(`Logged in to ${loginResult.repository.registry}`);
+        coreExports.info(`✅ Successfully logged in to ${loginResult.repository.registry}`);
         registryLogins.push(loginResult.repository.registry);
     }
     // Add registry login info to summary
@@ -9096,23 +9115,29 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     }
     summary += '\n';
     // Pull all images
+    coreExports.info('📥 Starting to pull images');
     for (const tag of primaryTags) {
-        coreExports.info(`Pulling image: ${tag}`);
+        coreExports.info(`⬇️ Pulling image: ${tag}`);
         try {
             execSync(`docker pull ${tag}`, { stdio: 'inherit' });
+            coreExports.info(`✅ Successfully pulled ${tag}`);
         }
         catch (error) {
             throw new Error(`Failed to pull image ${tag}: ${error}`);
         }
     }
     // Create and push manifests
+    coreExports.info('🚀 Starting manifest creation and push');
     for (const manifestTag of manifestTags) {
-        coreExports.info(`Creating manifest: ${manifestTag}`);
+        coreExports.info(`\n📦 Creating manifest: ${manifestTag}`);
         try {
             // Create manifest
+            coreExports.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`);
             execSync(`docker manifest create ${manifestTag} ${primaryTags.join(' ')}`, { stdio: 'inherit' });
             // Push manifest
+            coreExports.info(`⬆️ Pushing manifest: ${manifestTag}`);
             execSync(`docker manifest push ${manifestTag}`, { stdio: 'inherit' });
+            coreExports.info(`✅ Successfully created and pushed manifest: ${manifestTag}`);
         }
         catch (error) {
             throw new Error(`Failed to create/push manifest ${manifestTag}: ${error}`);
@@ -9126,6 +9151,7 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     summary += `| 📊 Total Tags | ${manifestTags.length} |\n`;
     summary += `| 💻 Total Platforms | ${primaryTags.length} |\n`;
     summary += `| ✅ Status | Success |\n\n`;
+    coreExports.info(`✅ Completed manifest creation for container: ${containerName}`);
     return summary;
 }
 

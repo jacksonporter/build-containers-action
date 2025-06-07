@@ -15,14 +15,22 @@ interface TemplateValues {
 }
 
 export async function createManifestMode(): Promise<ModeReturn> {
+  core.info('🚀 Starting create-manifest mode')
+
   const config = await getConfigFromJSON(JSON.parse(core.getInput('config')))
-  const buildOutputs = JSON.parse(
-    core.getInput('build-outputs')
-  ) as BuildOutput[]
+  core.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`)
+
+  const buildOutputs = JSON.parse(core.getInput('build-outputs')) as Record<
+    string,
+    BuildOutput
+  >
+  core.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`)
+
   const templateValues: TemplateValues = {
     env: process.env,
     GIT_PROJECT_ROOT: await getGitProjectRoot()
   }
+  core.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`)
 
   // Start building the summary
   let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`
@@ -30,10 +38,18 @@ export async function createManifestMode(): Promise<ModeReturn> {
 
   // Process each container
   for (const [containerName, containerConfig] of Object.entries(config)) {
+    core.info(`\n🔄 Processing container: ${containerName}`)
+
+    // Filter build outputs for this container
+    const containerBuildOutputs = Object.values(buildOutputs).filter(
+      (output) => output.config.containerName === containerName
+    )
+    core.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`)
+
     const containerSummary = await processContainer(
       containerName,
       containerConfig,
-      buildOutputs,
+      containerBuildOutputs,
       templateValues
     )
     summary += containerSummary
@@ -42,10 +58,12 @@ export async function createManifestMode(): Promise<ModeReturn> {
   summary += '\n</details>'
 
   if (core.getInput('skip-step-summary') === 'false') {
+    core.info('📝 Writing step summary')
     // Write the summary
     await core.summary.addRaw(summary).write()
   }
 
+  core.info('✅ Create manifest mode completed successfully')
   return {}
 }
 
@@ -55,6 +73,7 @@ async function processContainer(
   buildOutputs: BuildOutput[],
   templateValues: TemplateValues
 ): Promise<string> {
+  core.info(`\n📦 Starting manifest creation for container: ${containerName}`)
   let summary = `### 📦 Container: ${containerName}\n\n`
 
   // Get all primary tags from build outputs
@@ -65,14 +84,17 @@ async function processContainer(
   if (primaryTags.length === 0) {
     throw new Error(`No primary tags found for container ${containerName}`)
   }
+  core.info(`🏷️ Found ${primaryTags.length} primary tags`)
 
   // Get manifest tag templates
-  const manifestTagTemplates = containerConfig.default?.manifestTagTemplates || []
+  const manifestTagTemplates =
+    containerConfig.default?.manifestTagTemplates || []
   if (manifestTagTemplates.length === 0) {
     throw new Error(
       `No manifest tag templates found for container ${containerName}`
     )
   }
+  core.info(`📝 Found ${manifestTagTemplates.length} manifest tag templates`)
 
   // Add container info to template values
   templateValues.CONTAINER_NAME = containerName
@@ -81,6 +103,7 @@ async function processContainer(
   const manifestTags = manifestTagTemplates.map((template: string) => {
     return Handlebars.compile(template)(templateValues)
   })
+  core.info(`✨ Generated ${manifestTags.length} manifest tags`)
 
   // Get repositories from the first platform that has them
   let repositories = {}
@@ -103,6 +126,7 @@ async function processContainer(
       }
     }
   }
+  core.info(`🔑 Found ${Object.keys(repositories).length} repositories to authenticate with`)
 
   // Create a JobInclude object for loginToRepositories
   const jobInclude: JobInclude = {
@@ -112,12 +136,13 @@ async function processContainer(
   }
 
   // Login to repositories
+  core.info('🔐 Starting registry authentication')
   const registryLogins = []
   for await (const loginResult of loginToRepositories(
     jobInclude,
     templateValues
   )) {
-    core.info(`Logged in to ${loginResult.repository.registry}`)
+    core.info(`✅ Successfully logged in to ${loginResult.repository.registry}`)
     registryLogins.push(loginResult.repository.registry)
   }
 
@@ -151,27 +176,33 @@ async function processContainer(
   summary += '\n'
 
   // Pull all images
+  core.info('📥 Starting to pull images')
   for (const tag of primaryTags) {
-    core.info(`Pulling image: ${tag}`)
+    core.info(`⬇️ Pulling image: ${tag}`)
     try {
       execSync(`docker pull ${tag}`, { stdio: 'inherit' })
+      core.info(`✅ Successfully pulled ${tag}`)
     } catch (error) {
       throw new Error(`Failed to pull image ${tag}: ${error}`)
     }
   }
 
   // Create and push manifests
+  core.info('🚀 Starting manifest creation and push')
   for (const manifestTag of manifestTags) {
-    core.info(`Creating manifest: ${manifestTag}`)
+    core.info(`\n📦 Creating manifest: ${manifestTag}`)
     try {
       // Create manifest
+      core.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`)
       execSync(
         `docker manifest create ${manifestTag} ${primaryTags.join(' ')}`,
         { stdio: 'inherit' }
       )
 
       // Push manifest
+      core.info(`⬆️ Pushing manifest: ${manifestTag}`)
       execSync(`docker manifest push ${manifestTag}`, { stdio: 'inherit' })
+      core.info(`✅ Successfully created and pushed manifest: ${manifestTag}`)
     } catch (error) {
       throw new Error(`Failed to create/push manifest ${manifestTag}: ${error}`)
     }
@@ -186,5 +217,6 @@ async function processContainer(
   summary += `| 💻 Total Platforms | ${primaryTags.length} |\n`
   summary += `| ✅ Status | Success |\n\n`
 
+  core.info(`✅ Completed manifest creation for container: ${containerName}`)
   return summary
 }

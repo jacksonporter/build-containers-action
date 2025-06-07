@@ -313,7 +313,10 @@ export async function buildMode(): Promise<ModeReturn> {
 
     return {
       buildOutput: {
-        config: jobIncludeConfig,
+        config: {
+          ...jobIncludeConfig,
+          containerName: jobIncludeConfig.containerName
+        },
         buildInfo: {
           primaryTag: builtTag,
           totalTags: fullTags.length,
