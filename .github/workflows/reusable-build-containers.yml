@@ -102,7 +102,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - id: build-containers-action-build
-        if: matrix.ci.useBuildkit == false
         uses: jacksonporter/build-containers-action@jp/v1dev
         env:
           DOCKER_BUILDKIT: ${{ matrix.ci.useBuildkit && '1' || '' }}
