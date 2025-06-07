@@ -8801,6 +8801,7 @@ async function buildMode() {
         env: process.env,
         GIT_PROJECT_ROOT: await getGitProjectRoot(),
         CONTAINER_NAME: jobIncludeConfig.containerName,
+        PLATFORM: jobIncludeConfig.platform_slug || process.platform,
         ARCH: jobIncludeConfig.arch || process.arch
     };
     const buildName = jobIncludeConfig.job || coreExports.getInput('build-name') || 'build';
@@ -8811,7 +8812,7 @@ async function buildMode() {
     summary += `|---------|-------|\n`;
     summary += `| 🏷️ Job Name | \`${buildName}\` |\n`;
     summary += `| 📦 Container Name | \`${jobIncludeConfig.containerName}\` |\n`;
-    summary += `| 💻 Architecture | \`${jobIncludeConfig.arch || process.arch}\` |\n`;
+    summary += `| 💻 Builder Architecture | \`${process.arch}\` |\n`;
     if (jobIncludeConfig.target) {
         summary += `| 🎯 Target | \`${jobIncludeConfig.target}\` |\n`;
     }
@@ -8923,7 +8924,7 @@ function buildLinuxMatrixFromFinalizedContainerConfig(config) {
         }
     }
     // Return undefined if no jobs were added
-    return matrix.job.length > 0 ? matrix : undefined;
+    return matrix.job.length > 0 ? matrix : null;
 }
 function buildWindowsMatrixFromFinalizedContainerConfig(config) {
     const matrix = {
@@ -8946,7 +8947,7 @@ function buildWindowsMatrixFromFinalizedContainerConfig(config) {
         }
     }
     // Return undefined if no jobs were added
-    return matrix.job.length > 0 ? matrix : undefined;
+    return matrix.job.length > 0 ? matrix : null;
 }
 
 async function generateMatrixMode() {
@@ -9030,9 +9031,15 @@ async function run() {
             coreExports.setOutput('linuxMatrix', JSON.stringify(modeReturn.linuxMatrix));
             coreExports.info(`Linux matrix: ${JSON.stringify(modeReturn.linuxMatrix, null, 2)}`);
         }
+        else {
+            coreExports.setOutput('linuxMatrix', '{}');
+        }
         if (modeReturn.windowsMatrix) {
             coreExports.setOutput('windowsMatrix', JSON.stringify(modeReturn.windowsMatrix));
             coreExports.info(`Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`);
+        }
+        else {
+            coreExports.setOutput('windowsMatrix', '{}');
         }
         if (modeReturn.buildOutput) {
             coreExports.setOutput('build-output-json', JSON.stringify(modeReturn.buildOutput));

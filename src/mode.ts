@@ -30,7 +30,7 @@ export async function startMode(): Promise<ModeReturn> {
 
 export interface ModeReturn {
   finalizedContainerConfig?: FinalizedContainerConfig
-  linuxMatrix?: FinalizedMatrixConfig
-  windowsMatrix?: FinalizedMatrixConfig
+  linuxMatrix?: FinalizedMatrixConfig | null
+  windowsMatrix?: FinalizedMatrixConfig | null
   buildOutput?: BuildOutput
 }

@@ -31,6 +31,8 @@ export async function run(): Promise<void> {
       core.info(
         `Linux matrix: ${JSON.stringify(modeReturn.linuxMatrix, null, 2)}`
       )
+    } else {
+      core.setOutput('linuxMatrix', '{}')
     }
 
     if (modeReturn.windowsMatrix) {
@@ -38,6 +40,8 @@ export async function run(): Promise<void> {
       core.info(
         `Windows matrix: ${JSON.stringify(modeReturn.windowsMatrix, null, 2)}`
       )
+    } else {
+      core.setOutput('windowsMatrix', '{}')
     }
 
     if (modeReturn.buildOutput) {

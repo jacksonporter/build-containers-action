@@ -198,6 +198,7 @@ export async function buildMode(): Promise<ModeReturn> {
     env: process.env,
     GIT_PROJECT_ROOT: await getGitProjectRoot(),
     CONTAINER_NAME: jobIncludeConfig.containerName,
+    PLATFORM: jobIncludeConfig.platform_slug || process.platform,
     ARCH: jobIncludeConfig.arch || process.arch
   }
 
@@ -211,7 +212,7 @@ export async function buildMode(): Promise<ModeReturn> {
   summary += `|---------|-------|\n`
   summary += `| 🏷️ Job Name | \`${buildName}\` |\n`
   summary += `| 📦 Container Name | \`${jobIncludeConfig.containerName}\` |\n`
-  summary += `| 💻 Architecture | \`${jobIncludeConfig.arch || process.arch}\` |\n`
+  summary += `| 💻 Builder Architecture | \`${process.arch}\` |\n`
   if (jobIncludeConfig.target) {
     summary += `| 🎯 Target | \`${jobIncludeConfig.target}\` |\n`
   }
