@@ -26,13 +26,9 @@ export async function generateMatrixMode(): Promise<ModeReturn> {
     finalizedContainerConfig
   )
 
-  // Check if matrices have any jobs
-  const hasLinuxJobs = linuxMatrix && Object.keys(linuxMatrix).length > 0
-  const hasWindowsJobs = windowsMatrix && Object.keys(windowsMatrix).length > 0
-
   return {
     finalizedContainerConfig,
-    linuxMatrix: hasLinuxJobs ? linuxMatrix : undefined,
-    windowsMatrix: hasWindowsJobs ? windowsMatrix : undefined
+    linuxMatrix,
+    windowsMatrix
   }
 }

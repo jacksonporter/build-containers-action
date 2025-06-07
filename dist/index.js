@@ -8922,7 +8922,8 @@ function buildLinuxMatrixFromFinalizedContainerConfig(config) {
             });
         }
     }
-    return matrix;
+    // Return undefined if no jobs were added
+    return matrix.job.length > 0 ? matrix : undefined;
 }
 function buildWindowsMatrixFromFinalizedContainerConfig(config) {
     const matrix = {
@@ -8944,7 +8945,8 @@ function buildWindowsMatrixFromFinalizedContainerConfig(config) {
             });
         }
     }
-    return matrix;
+    // Return undefined if no jobs were added
+    return matrix.job.length > 0 ? matrix : undefined;
 }
 
 async function generateMatrixMode() {
@@ -8955,13 +8957,10 @@ async function generateMatrixMode() {
     coreExports.debug(`Finalized container config: ${JSON.stringify(finalizedContainerConfig, null, 2)}`);
     const linuxMatrix = buildLinuxMatrixFromFinalizedContainerConfig(finalizedContainerConfig);
     const windowsMatrix = buildWindowsMatrixFromFinalizedContainerConfig(finalizedContainerConfig);
-    // Check if matrices have any jobs
-    const hasLinuxJobs = linuxMatrix && Object.keys(linuxMatrix).length > 0;
-    const hasWindowsJobs = windowsMatrix && Object.keys(windowsMatrix).length > 0;
     return {
         finalizedContainerConfig,
-        linuxMatrix: hasLinuxJobs ? linuxMatrix : undefined,
-        windowsMatrix: hasWindowsJobs ? windowsMatrix : undefined
+        linuxMatrix,
+        windowsMatrix
     };
 }
 

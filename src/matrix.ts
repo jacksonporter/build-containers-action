@@ -16,7 +16,7 @@ export interface LinuxJobInclude extends JobInclude {
 
 export function buildLinuxMatrixFromFinalizedContainerConfig(
   config: FinalizedContainerConfig
-): FinalizedMatrixConfig {
+): FinalizedMatrixConfig | undefined {
   const matrix: FinalizedMatrixConfig = {
     job: [],
     include: [] as Array<JobInclude>
@@ -43,7 +43,8 @@ export function buildLinuxMatrixFromFinalizedContainerConfig(
     }
   }
 
-  return matrix
+  // Return undefined if no jobs were added
+  return matrix.job.length > 0 ? matrix : undefined
 }
 
 export interface FinalizedMatrixConfig {
@@ -53,7 +54,7 @@ export interface FinalizedMatrixConfig {
 
 export function buildWindowsMatrixFromFinalizedContainerConfig(
   config: FinalizedContainerConfig
-): FinalizedMatrixConfig {
+): FinalizedMatrixConfig | undefined {
   const matrix: FinalizedMatrixConfig = {
     job: [],
     include: [] as Array<JobInclude>
@@ -80,5 +81,6 @@ export function buildWindowsMatrixFromFinalizedContainerConfig(
     }
   }
 
-  return matrix
+  // Return undefined if no jobs were added
+  return matrix.job.length > 0 ? matrix : undefined
 }
