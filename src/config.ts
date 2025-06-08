@@ -479,6 +479,7 @@ export function validateWindowsPlatformConfig(
 }
 
 export interface FinalizedContainerConfig {
+  manifestTagTemplates?: string[]
   linuxPlatforms?: {
     [key: string]: FinalizedLinuxPlatformConfig
   }
@@ -539,17 +540,20 @@ export function validateContainerConfig(
     core.warning('containerConfig.default.platformTagTemplates is empty')
   }
 
-  containerConfig.default.manifestTagTemplates =
+  containerConfig.manifestTagTemplates =
     containerConfig.default.manifestTagTemplates ||
     containerDefaults?.manifestTagTemplates ||
     []
 
-  if (containerConfig.default.manifestTagTemplates.length === 0) {
-    core.warning('containerConfig.default.manifestTagTemplates is empty')
+  // delete manifestTagTemplates from default config, as they are only used at the container level
+  delete containerConfig.default.manifestTagTemplates
+
+  if (containerConfig.manifestTagTemplates.length === 0) {
+    core.warning('containerConfig.manifestTagTemplates is empty')
   }
 
   if (
-    containerConfig.default.manifestTagTemplates.length === 0 &&
+    containerConfig.manifestTagTemplates.length === 0 &&
     containerConfig.default.platformTagTemplates.length === 0
   ) {
     throw new Error(

@@ -8599,14 +8599,16 @@ function validateContainerConfig(containerConfig, containerDefaults, repositorie
     if (containerConfig.default.platformTagTemplates.length === 0) {
         coreExports.warning('containerConfig.default.platformTagTemplates is empty');
     }
-    containerConfig.default.manifestTagTemplates =
+    containerConfig.manifestTagTemplates =
         containerConfig.default.manifestTagTemplates ||
             containerDefaults?.manifestTagTemplates ||
             [];
-    if (containerConfig.default.manifestTagTemplates.length === 0) {
-        coreExports.warning('containerConfig.default.manifestTagTemplates is empty');
+    // delete manifestTagTemplates from default config, as they are only used at the container level
+    delete containerConfig.default.manifestTagTemplates;
+    if (containerConfig.manifestTagTemplates.length === 0) {
+        coreExports.warning('containerConfig.manifestTagTemplates is empty');
     }
-    if (containerConfig.default.manifestTagTemplates.length === 0 &&
+    if (containerConfig.manifestTagTemplates.length === 0 &&
         containerConfig.default.platformTagTemplates.length === 0) {
         throw new Error('containerConfig.default.manifestTagTemplates and containerConfig.default.platformTagTemplates cannot both be empty');
     }
