@@ -535,10 +535,27 @@ export function validateContainerConfig(
     containerDefaults?.platformTagTemplates ||
     []
 
+  if (containerConfig.default.platformTagTemplates.length === 0) {
+    core.warning('containerConfig.default.platformTagTemplates is empty')
+  }
+
   containerConfig.default.manifestTagTemplates =
     containerConfig.default.manifestTagTemplates ||
     containerDefaults?.manifestTagTemplates ||
     []
+
+  if (containerConfig.default.manifestTagTemplates.length === 0) {
+    core.warning('containerConfig.default.manifestTagTemplates is empty')
+  }
+
+  if (
+    containerConfig.default.manifestTagTemplates.length === 0 &&
+    containerConfig.default.platformTagTemplates.length === 0
+  ) {
+    throw new Error(
+      'containerConfig.default.manifestTagTemplates and containerConfig.default.platformTagTemplates cannot both be empty'
+    )
+  }
 
   containerConfig.default.selectedRepositories =
     containerConfig.default.selectedRepositories ||

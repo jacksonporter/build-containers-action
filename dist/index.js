@@ -8596,10 +8596,20 @@ function validateContainerConfig(containerConfig, containerDefaults, repositorie
         containerConfig.default.platformTagTemplates ||
             containerDefaults?.platformTagTemplates ||
             [];
+    if (containerConfig.default.platformTagTemplates.length === 0) {
+        coreExports.warning('containerConfig.default.platformTagTemplates is empty');
+    }
     containerConfig.default.manifestTagTemplates =
         containerConfig.default.manifestTagTemplates ||
             containerDefaults?.manifestTagTemplates ||
             [];
+    if (containerConfig.default.manifestTagTemplates.length === 0) {
+        coreExports.warning('containerConfig.default.manifestTagTemplates is empty');
+    }
+    if (containerConfig.default.manifestTagTemplates.length === 0 &&
+        containerConfig.default.platformTagTemplates.length === 0) {
+        throw new Error('containerConfig.default.manifestTagTemplates and containerConfig.default.platformTagTemplates cannot both be empty');
+    }
     containerConfig.default.selectedRepositories =
         containerConfig.default.selectedRepositories ||
             containerDefaults?.selectedRepositories ||
@@ -9001,56 +9011,6 @@ async function combineBuildOutputsMode() {
     };
 }
 
-async function createManifestMode() {
-    coreExports.info('🚀 Starting create-manifest mode');
-    try {
-        const config = await getConfigFromJSON(getRawConfig());
-        coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
-        const buildOutputsInput = coreExports.getInput('build-outputs');
-        coreExports.info('📦 Raw build outputs input received');
-        let buildOutputs;
-        try {
-            buildOutputs = JSON.parse(buildOutputsInput);
-            coreExports.info(`📦 Successfully parsed build outputs JSON`);
-        }
-        catch (error) {
-            coreExports.error(`❌ Failed to parse build outputs JSON: ${error}`);
-            coreExports.error(`📄 Build outputs input length: ${buildOutputsInput.length}`);
-            coreExports.error(`📄 First 100 characters of build outputs: ${buildOutputsInput.substring(0, 100)}`);
-            throw error;
-        }
-        coreExports.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`);
-        const templateValues = {
-            env: process.env,
-            GIT_PROJECT_ROOT: await getGitProjectRoot()
-        };
-        coreExports.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`);
-        // Start building the summary
-        let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
-        summary += `## 📋 Manifest Configuration\n\n`;
-        // Process each container
-        for (const [containerName, containerConfig] of Object.entries(config)) {
-            coreExports.info(`\n🔄 Processing container: ${containerName}`);
-            // Filter build outputs for this container
-            const containerBuildOutputs = Object.values(buildOutputs).filter((output) => output.config.containerName === containerName);
-            coreExports.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`);
-            const containerSummary = await processContainer(containerName, containerConfig, containerBuildOutputs, templateValues);
-            summary += containerSummary;
-        }
-        summary += '\n</details>';
-        if (coreExports.getInput('skip-step-summary') === 'false') {
-            coreExports.info('📝 Writing step summary');
-            // Write the summary
-            await coreExports.summary.addRaw(summary).write();
-        }
-        coreExports.info('✅ Create manifest mode completed successfully');
-        return {};
-    }
-    catch (error) {
-        coreExports.error(`❌ Error in create-manifest mode: ${error}`);
-        throw error;
-    }
-}
 async function processContainer(containerName, containerConfig, buildOutputs, templateValues) {
     coreExports.info(`\n📦 Starting manifest creation for container: ${containerName}`);
     let summary = `### 📦 Container: ${containerName}\n\n`;
@@ -9171,6 +9131,56 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     summary += `| ✅ Status | Success |\n\n`;
     coreExports.info(`✅ Completed manifest creation for container: ${containerName}`);
     return summary;
+}
+async function createManifestMode() {
+    coreExports.info('🚀 Starting create-manifest mode');
+    try {
+        const config = await getConfigFromJSON(getRawConfig());
+        coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
+        const buildOutputsInput = coreExports.getInput('build-outputs');
+        coreExports.info('📦 Raw build outputs input received');
+        let buildOutputs;
+        try {
+            buildOutputs = JSON.parse(buildOutputsInput);
+            coreExports.info(`📦 Successfully parsed build outputs JSON`);
+        }
+        catch (error) {
+            coreExports.error(`❌ Failed to parse build outputs JSOo : ${error}`);
+            coreExports.error(`📄 Build outputs input length: ${buildOutputsInput.length}`);
+            coreExports.error(`📄 First 100 characters of build outputs: ${buildOutputsInput.substring(0, 100)}`);
+            throw error;
+        }
+        coreExports.info(`📦 Found ${Object.keys(buildOutputs).length} build outputs`);
+        const templateValues = {
+            env: process.env,
+            GIT_PROJECT_ROOT: await getGitProjectRoot()
+        };
+        coreExports.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`);
+        // Start building the summary
+        let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
+        summary += `## 📋 Manifest Configuration\n\n`;
+        // Process each container
+        for (const [containerName, containerConfig] of Object.entries(config)) {
+            coreExports.info(`\n🔄 Processing container: ${containerName}`);
+            // Filter build outputs for this container
+            const containerBuildOutputs = Object.values(buildOutputs).filter((output) => output.config.containerName === containerName);
+            coreExports.info(`📊 Found ${containerBuildOutputs.length} build outputs for ${containerName}`);
+            const containerSummary = await processContainer(containerName, containerConfig, containerBuildOutputs, templateValues);
+            summary += containerSummary;
+        }
+        summary += '\n</details>';
+        if (coreExports.getInput('skip-step-summary') === 'false') {
+            coreExports.info('📝 Writing step summary');
+            // Write the summary
+            await coreExports.summary.addRaw(summary).write();
+        }
+        coreExports.info('✅ Create manifest mode completed successfully');
+        return {};
+    }
+    catch (error) {
+        coreExports.error(`❌ Error in create-manifest mode: ${error}`);
+        throw error;
+    }
 }
 
 var InputMode;
