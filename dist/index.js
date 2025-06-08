@@ -9114,13 +9114,22 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     for (const manifestTag of manifestTags) {
         coreExports.info(`\n📦 Creating manifest: ${manifestTag}`);
         try {
-            // Create manifest
-            coreExports.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`);
-            execSync(`docker manifest create ${manifestTag} ${primaryTags.join(' ')}`, { stdio: 'inherit' });
-            // Push manifest
-            coreExports.info(`⬆️ Pushing manifest: ${manifestTag}`);
-            execSync(`docker manifest push ${manifestTag}`, { stdio: 'inherit' });
-            coreExports.info(`✅ Successfully created and pushed manifest: ${manifestTag}`);
+            // Create manifest for each repository
+            for (const repository of Object.values(repositories)) {
+                // Combine repository info with manifest tag
+                const fullManifestTag = `${repository.registry}/${repository.repository}:${manifestTag}`;
+                // Create manifest
+                coreExports.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`);
+                execSync(`docker manifest create ${fullManifestTag} ${primaryTags.join(' ')}`, {
+                    stdio: 'inherit'
+                });
+                // Push manifest
+                coreExports.info(`⬆️ Pushing manifest: ${fullManifestTag}`);
+                execSync(`docker manifest push ${fullManifestTag}`, {
+                    stdio: 'inherit'
+                });
+                coreExports.info(`✅ Successfully created and pushed manifest: ${fullManifestTag}`);
+            }
         }
         catch (error) {
             throw new Error(`Failed to create/push manifest ${manifestTag}: ${error}`);

@@ -1,5 +1,9 @@
 import * as core from '@actions/core'
-import { getConfigFromJSON, ContainerConfig } from '../config.js'
+import {
+  getConfigFromJSON,
+  ContainerConfig,
+  RepositoryConfig
+} from '../config.js'
 import { getGitProjectRoot } from '../git.js'
 import { loginToRepositories } from './build.js'
 import { execSync } from 'child_process'
@@ -55,7 +59,7 @@ async function processContainer(
   core.info(`✨ Generated ${manifestTags.length} manifest tags`)
 
   // Get repositories from the first platform that has them
-  let repositories = {}
+  let repositories: { [key: string]: RepositoryConfig } = {}
   if (containerConfig.linuxPlatforms) {
     for (const platform of Object.values(containerConfig.linuxPlatforms)) {
       if (platform.repositories) {
@@ -143,17 +147,29 @@ async function processContainer(
   for (const manifestTag of manifestTags) {
     core.info(`\n📦 Creating manifest: ${manifestTag}`)
     try {
-      // Create manifest
-      core.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`)
-      execSync(
-        `docker manifest create ${manifestTag} ${primaryTags.join(' ')}`,
-        { stdio: 'inherit' }
-      )
+      // Create manifest for each repository
+      for (const repository of Object.values(repositories)) {
+        // Combine repository info with manifest tag
+        const fullManifestTag = `${repository.registry}/${repository.repository}:${manifestTag}`
 
-      // Push manifest
-      core.info(`⬆️ Pushing manifest: ${manifestTag}`)
-      execSync(`docker manifest push ${manifestTag}`, { stdio: 'inherit' })
-      core.info(`✅ Successfully created and pushed manifest: ${manifestTag}`)
+        // Create manifest
+        core.info(`🔄 Creating manifest with tags: ${primaryTags.join(', ')}`)
+        execSync(
+          `docker manifest create ${fullManifestTag} ${primaryTags.join(' ')}`,
+          {
+            stdio: 'inherit'
+          }
+        )
+
+        // Push manifest
+        core.info(`⬆️ Pushing manifest: ${fullManifestTag}`)
+        execSync(`docker manifest push ${fullManifestTag}`, {
+          stdio: 'inherit'
+        })
+        core.info(
+          `✅ Successfully created and pushed manifest: ${fullManifestTag}`
+        )
+      }
     } catch (error) {
       throw new Error(`Failed to create/push manifest ${manifestTag}: ${error}`)
     }
