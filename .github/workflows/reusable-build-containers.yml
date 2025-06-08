@@ -160,6 +160,10 @@ jobs:
     needs:
       - combine-build-outputs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -167,6 +171,8 @@ jobs:
           fetch-depth: 0
       - name: Run combine-manifests
         uses: jacksonporter/build-containers-action@jp/v1dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.github-token }}
         with:
           mode: create-manifest
           config: ${{ inputs.config }}
