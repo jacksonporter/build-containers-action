@@ -9016,6 +9016,10 @@ async function combineBuildOutputsMode() {
 async function processContainer(containerName, containerConfig, buildOutputs, templateValues) {
     coreExports.info(`\n📦 Starting manifest creation for container: ${containerName}`);
     let summary = `### 📦 Container: ${containerName}\n\n`;
+    const updatedTemplateValues = {
+        ...templateValues,
+        CONTAINER_NAME: containerName
+    };
     // Get all primary tags from build outputs
     const primaryTags = buildOutputs
         .filter((output) => output.config.containerName === containerName)
@@ -9025,16 +9029,14 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     }
     coreExports.info(`🏷️ Found ${primaryTags.length} primary tags`);
     // Get manifest tag templates
-    const manifestTagTemplates = containerConfig.default?.manifestTagTemplates || [];
+    const manifestTagTemplates = containerConfig.manifestTagTemplates || [];
     if (manifestTagTemplates.length === 0) {
         throw new Error(`No manifest tag templates found for container ${containerName}`);
     }
     coreExports.info(`📝 Found ${manifestTagTemplates.length} manifest tag templates`);
-    // Add container info to template values
-    templateValues.CONTAINER_NAME = containerName;
     // Populate manifest tags
     const manifestTags = manifestTagTemplates.map((template) => {
-        return libExports$1.compile(template)(templateValues);
+        return libExports$1.compile(template)(updatedTemplateValues);
     });
     coreExports.info(`✨ Generated ${manifestTags.length} manifest tags`);
     // Get repositories from the first platform that has them

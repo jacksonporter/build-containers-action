@@ -4,7 +4,7 @@ import { FinalizedMatrixConfig } from './matrix.js'
 import { buildMode, BuildOutput } from './modes/build.js'
 import { generateMatrixMode } from './modes/generateMatrix.js'
 import { combineBuildOutputsMode } from './modes/combineBuildOutputs.js'
-import { createManifestMode } from './modes/create-manifest.js'
+import { createManifestMode } from './modes/createManifest.js'
 
 export enum InputMode {
   GENERATE_MATRIX = 'generate-matrix',
