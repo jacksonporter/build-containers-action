@@ -180,6 +180,8 @@ export async function createManifestMode(): Promise<ModeReturn> {
       `📋 Loaded configuration for ${Object.keys(config).length} containers`
     )
 
+    core.info('Full Container Config: \n' + JSON.stringify(config, null, 2))
+
     const buildOutputsInput = core.getInput('build-outputs')
     core.info('📦 Raw build outputs input received')
 

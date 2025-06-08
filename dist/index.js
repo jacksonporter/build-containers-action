@@ -9137,6 +9137,7 @@ async function createManifestMode() {
     try {
         const config = await getConfigFromJSON(getRawConfig());
         coreExports.info(`📋 Loaded configuration for ${Object.keys(config).length} containers`);
+        coreExports.info('Full Container Config: \n' + JSON.stringify(config, null, 2));
         const buildOutputsInput = coreExports.getInput('build-outputs');
         coreExports.info('📦 Raw build outputs input received');
         let buildOutputs;
