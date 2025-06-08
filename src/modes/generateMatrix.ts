@@ -15,7 +15,7 @@ export async function generateMatrixMode(): Promise<ModeReturn> {
 
   const finalizedContainerConfig = await getConfigFromJSON(config)
 
-  core.debug(
+  core.info(
     `Finalized container config: ${JSON.stringify(finalizedContainerConfig, null, 2)}`
   )
 

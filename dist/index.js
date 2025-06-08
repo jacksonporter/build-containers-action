@@ -8639,6 +8639,7 @@ function validateContainerConfig(containerConfig, containerDefaults, repositorie
         throw new Error('At least one platform (linux or windows) must be specified');
     }
     const finalizedContainerConfig = {
+        manifestTagTemplates: containerConfig.manifestTagTemplates,
         linuxPlatforms: containerConfig.linuxPlatforms,
         windowsPlatforms: containerConfig.windowsPlatforms
     };
@@ -8972,7 +8973,7 @@ async function generateMatrixMode() {
     const config = getRawConfig();
     coreExports.debug(`Raw config: ${JSON.stringify(config, null, 2)}`);
     const finalizedContainerConfig = await getConfigFromJSON(config);
-    coreExports.debug(`Finalized container config: ${JSON.stringify(finalizedContainerConfig, null, 2)}`);
+    coreExports.info(`Finalized container config: ${JSON.stringify(finalizedContainerConfig, null, 2)}`);
     const linuxMatrix = buildLinuxMatrixFromFinalizedContainerConfig(finalizedContainerConfig);
     const windowsMatrix = buildWindowsMatrixFromFinalizedContainerConfig(finalizedContainerConfig);
     return {

@@ -607,6 +607,7 @@ export function validateContainerConfig(
   }
 
   const finalizedContainerConfig: FinalizedContainerConfig = {
+    manifestTagTemplates: containerConfig.manifestTagTemplates,
     linuxPlatforms: containerConfig.linuxPlatforms,
     windowsPlatforms: containerConfig.windowsPlatforms
   }
