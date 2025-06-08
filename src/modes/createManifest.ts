@@ -130,18 +130,6 @@ async function processContainer(
   }
   summary += '\n'
 
-  // Pull all images
-  core.info('📥 Starting to pull images')
-  for (const tag of primaryTags) {
-    core.info(`⬇️ Pulling image: ${tag}`)
-    try {
-      execSync(`docker pull ${tag}`, { stdio: 'inherit' })
-      core.info(`✅ Successfully pulled ${tag}`)
-    } catch (error) {
-      throw new Error(`Failed to pull image ${tag}: ${error}`)
-    }
-  }
-
   // Create and push manifests
   core.info('🚀 Starting manifest creation and push')
   for (const manifestTag of manifestTags) {
