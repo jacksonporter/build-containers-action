@@ -101,6 +101,21 @@ async function processContainer(
     registryLogins.push(loginResult.repository.registry)
   }
 
+  // Manifest Results Table
+  // Determine the primary manifest tag (first in manifestTags)
+  const primaryManifestTag = manifestTags[0] || ''
+  const totalTags = manifestTags.length
+  const totalPlatforms = buildOutputs.length
+  const status = 'Success' // You can adjust this if you have error handling
+
+  summary += `\n🚀 <b>Manifest Results</b>\n\n`
+  summary += `| Metric | Value |\n|--------|-------|\n`
+  summary += `| 🏆 Primary Tag | <code>${primaryManifestTag}</code> |\n`
+  summary += `| 📊 Total Tags | ${totalTags} |\n`
+  summary += `| 🖥️ Total Platforms | ${totalPlatforms} |\n`
+  summary += `| ✅ Status | ${status} |\n`
+  summary += '\n\n'
+
   // Add registry login info to summary
   if (registryLogins.length > 0) {
     summary += `### 🔐 Registry Login\n\n`
@@ -112,23 +127,21 @@ async function processContainer(
     summary += '\n'
   }
 
-  // Add manifest info to summary
+  // Add manifest info to summary (show full registry/tag)
   summary += `### 🏷️ Manifest Tags\n\n`
-  summary += `| Tag |\n`
-  summary += `|-----|\n`
+  summary += `| Tag |\n|-----|\n`
   for (const tag of manifestTags) {
-    summary += `| \`${tag}\` |\n`
+    summary += `| <code>${tag}</code> |\n`
   }
   summary += '\n'
 
-  // Add platform info to summary
+  // Add platform info to summary (show full registry/tag for each platform)
   summary += `### 💻 Included Platforms\n\n`
-  summary += `| Platform | Tag | Status |\n`
-  summary += `|----------|-----|--------|\n`
+  summary += `| Platform | Tag | Status |\n|----------|-----|--------|\n`
   for (const buildOutput of buildOutputs) {
     const platform = buildOutput.buildInfo.platform || 'default'
     const tag = buildOutput.buildInfo.primaryTag
-    summary += `| \`${platform}\` | \`${tag}\` | ✅ Included |\n`
+    summary += `| \`${platform}\` | <code>${tag}</code> | ✅ Included |\n`
   }
   summary += '\n'
 
@@ -166,15 +179,6 @@ async function processContainer(
       throw new Error(`Failed to create/push manifest ${manifestTag}: ${error}`)
     }
   }
-
-  // Add results to summary
-  summary += `#### 🚀 Manifest Results\n\n`
-  summary += `| Metric | Value |\n`
-  summary += `|--------|-------|\n`
-  summary += `| 🏆 Primary Tag | \`${manifestTags[0]}\` |\n`
-  summary += `| 📊 Total Tags | ${manifestTags.length} |\n`
-  summary += `| 💻 Total Platforms | ${primaryTags.length} |\n`
-  summary += `| ✅ Status | Success |\n\n`
 
   core.info(`✅ Completed manifest creation for container: ${containerName}`)
   return summary
