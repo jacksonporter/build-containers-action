@@ -214,10 +214,7 @@ export async function createManifestMode(): Promise<ModeReturn> {
     core.info(`📂 Git project root: ${templateValues.GIT_PROJECT_ROOT}`)
 
     // Start building the summary
-    let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`
-    summary += `## 📋 Manifest Configuration\n\n`
-    summary += `| Container | Status |\n`
-    summary += `|-----------|--------|\n`
+    let summary = `## 🐳 Container Manifest Summary\n\n`
 
     // Process each container
     for (const [containerName, containerConfig] of Object.entries(config)) {
@@ -239,8 +236,6 @@ export async function createManifestMode(): Promise<ModeReturn> {
       )
       summary += containerSummary
     }
-
-    summary += '\n</details>'
 
     if (core.getInput('skip-step-summary') === 'false') {
       core.info('📝 Writing step summary')

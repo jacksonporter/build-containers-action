@@ -20,9 +20,8 @@ export async function combineBuildOutputsMode(): Promise<ModeReturn> {
     .readdirSync(workspace)
     .filter((dir) => dir.startsWith(prefix))
 
-  // Start building the summary
-  let summary = `<details>\n<summary>🐳 Combined Build Outputs Summary (click to expand for details)</summary>\n\n`
-  summary += `## 📋 Build Outputs\n\n`
+  // Group builds by container name
+  const containerBuilds: Record<string, BuildOutput[]> = {}
 
   for (const dir of buildOutputDirs) {
     const buildOutputPath = path.join(workspace, dir, 'buildOutput.json')
@@ -32,21 +31,30 @@ export async function combineBuildOutputsMode(): Promise<ModeReturn> {
       const jobName = dir.replace(prefix, '')
       combinedOutput[jobName] = buildOutput
 
-      // Add to summary
-      summary += `### 🔨 ${jobName}\n\n`
-      summary += `| Setting | Value |\n`
-      summary += `|---------|-------|\n`
-      summary += `| 📦 Container Name | \`${buildOutput.config.containerName}\` |\n`
-      summary += `| 🏆 Primary Tag | \`${buildOutput.buildInfo.primaryTag}\` |\n`
-      summary += `| 📊 Total Tags | ${buildOutput.buildInfo.totalTags} |\n`
-      if (buildOutput.buildInfo.target) {
-        summary += `| 🎯 Target | \`${buildOutput.buildInfo.target}\` |\n`
+      // Group by container name
+      const containerName = buildOutput.config.containerName
+      if (!containerBuilds[containerName]) {
+        containerBuilds[containerName] = []
       }
-      if (buildOutput.buildInfo.platform) {
-        summary += `| 🌐 Platform | \`${buildOutput.buildInfo.platform}\` |\n`
-      }
-      summary += '\n'
+      containerBuilds[containerName].push(buildOutput)
     }
+  }
+
+  // Start building the summary
+  let summary = `<details>\n<summary>🐳 Combined Build Outputs Summary (click to expand for details)</summary>\n\n`
+  summary += `## 📋 Build Outputs\n\n`
+
+  // For each container, show all its builds
+  for (const [containerName, builds] of Object.entries(containerBuilds)) {
+    summary += `### 📦 ${containerName}\n\n`
+    summary += `| Platform | Primary Tag | Total Tags | Target |\n`
+    summary += `|----------|-------------|------------|--------|\n`
+
+    for (const build of builds) {
+      const platform = build.buildInfo.platform || 'default'
+      summary += `| \`${platform}\` | \`${build.buildInfo.primaryTag}\` | ${build.buildInfo.totalTags} | ${build.buildInfo.target ? `\`${build.buildInfo.target}\`` : '-'} |\n`
+    }
+    summary += '\n'
   }
 
   summary += '\n</details>'
