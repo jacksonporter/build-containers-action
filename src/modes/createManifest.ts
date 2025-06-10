@@ -113,7 +113,7 @@ async function processContainer(
   }
 
   // Add manifest info to summary
-  summary += `#### 🏷️ Generated Manifest Tags\n\n`
+  summary += `#### 🏷️ Manifest Tags\n\n`
   summary += `| Tag |\n`
   summary += `|-----|\n`
   for (const tag of manifestTags) {
@@ -123,10 +123,12 @@ async function processContainer(
 
   // Add platform info to summary
   summary += `#### 💻 Included Platforms\n\n`
-  summary += `| Platform |\n`
-  summary += `|----------|\n`
-  for (const tag of primaryTags) {
-    summary += `| \`${tag}\` |\n`
+  summary += `| Platform | Tag | Status |\n`
+  summary += `|----------|-----|--------|\n`
+  for (const buildOutput of buildOutputs) {
+    const platform = buildOutput.buildInfo.platform || 'default'
+    const tag = buildOutput.buildInfo.primaryTag
+    summary += `| \`${platform}\` | \`${tag}\` | ✅ Included |\n`
   }
   summary += '\n'
 
@@ -195,7 +197,7 @@ export async function createManifestMode(): Promise<ModeReturn> {
       buildOutputs = JSON.parse(buildOutputsInput)
       core.info(`📦 Successfully parsed build outputs JSON`)
     } catch (error) {
-      core.error(`❌ Failed to parse build outputs JSOo : ${error}`)
+      core.error(`❌ Failed to parse build outputs JSON: ${error}`)
       core.error(`📄 Build outputs input length: ${buildOutputsInput.length}`)
       core.error(
         `📄 First 100 characters of build outputs: ${buildOutputsInput.substring(0, 100)}`
@@ -214,6 +216,8 @@ export async function createManifestMode(): Promise<ModeReturn> {
     // Start building the summary
     let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`
     summary += `## 📋 Manifest Configuration\n\n`
+    summary += `| Container | Status |\n`
+    summary += `|-----------|--------|\n`
 
     // Process each container
     for (const [containerName, containerConfig] of Object.entries(config)) {

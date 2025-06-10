@@ -9000,6 +9000,9 @@ async function combineBuildOutputsMode() {
     const buildOutputDirs = fs
         .readdirSync(workspace)
         .filter((dir) => dir.startsWith(prefix));
+    // Start building the summary
+    let summary = `<details>\n<summary>🐳 Combined Build Outputs Summary (click to expand for details)</summary>\n\n`;
+    summary += `## 📋 Build Outputs\n\n`;
     for (const dir of buildOutputDirs) {
         const buildOutputPath = require$$1.join(workspace, dir, 'buildOutput.json');
         if (fs.existsSync(buildOutputPath)) {
@@ -9007,7 +9010,27 @@ async function combineBuildOutputsMode() {
             // Extract job name from directory name (remove prefix)
             const jobName = dir.replace(prefix, '');
             combinedOutput[jobName] = buildOutput;
+            // Add to summary
+            summary += `### 🔨 ${jobName}\n\n`;
+            summary += `| Setting | Value |\n`;
+            summary += `|---------|-------|\n`;
+            summary += `| 📦 Container Name | \`${buildOutput.config.containerName}\` |\n`;
+            summary += `| 🏆 Primary Tag | \`${buildOutput.buildInfo.primaryTag}\` |\n`;
+            summary += `| 📊 Total Tags | ${buildOutput.buildInfo.totalTags} |\n`;
+            if (buildOutput.buildInfo.target) {
+                summary += `| 🎯 Target | \`${buildOutput.buildInfo.target}\` |\n`;
+            }
+            if (buildOutput.buildInfo.platform) {
+                summary += `| 🌐 Platform | \`${buildOutput.buildInfo.platform}\` |\n`;
+            }
+            summary += '\n';
         }
+    }
+    summary += '\n</details>';
+    if (coreExports.getInput('skip-step-summary') === 'false') {
+        coreExports.info('📝 Writing step summary');
+        // Write the summary
+        await coreExports.summary.addRaw(summary).write();
     }
     return {
         buildOutput: combinedOutput
@@ -9082,7 +9105,7 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
         summary += '\n';
     }
     // Add manifest info to summary
-    summary += `#### 🏷️ Generated Manifest Tags\n\n`;
+    summary += `#### 🏷️ Manifest Tags\n\n`;
     summary += `| Tag |\n`;
     summary += `|-----|\n`;
     for (const tag of manifestTags) {
@@ -9091,10 +9114,12 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     summary += '\n';
     // Add platform info to summary
     summary += `#### 💻 Included Platforms\n\n`;
-    summary += `| Platform |\n`;
-    summary += `|----------|\n`;
-    for (const tag of primaryTags) {
-        summary += `| \`${tag}\` |\n`;
+    summary += `| Platform | Tag | Status |\n`;
+    summary += `|----------|-----|--------|\n`;
+    for (const buildOutput of buildOutputs) {
+        const platform = buildOutput.buildInfo.platform || 'default';
+        const tag = buildOutput.buildInfo.primaryTag;
+        summary += `| \`${platform}\` | \`${tag}\` | ✅ Included |\n`;
     }
     summary += '\n';
     // Create and push manifests
@@ -9148,7 +9173,7 @@ async function createManifestMode() {
             coreExports.info(`📦 Successfully parsed build outputs JSON`);
         }
         catch (error) {
-            coreExports.error(`❌ Failed to parse build outputs JSOo : ${error}`);
+            coreExports.error(`❌ Failed to parse build outputs JSON: ${error}`);
             coreExports.error(`📄 Build outputs input length: ${buildOutputsInput.length}`);
             coreExports.error(`📄 First 100 characters of build outputs: ${buildOutputsInput.substring(0, 100)}`);
             throw error;
@@ -9162,6 +9187,8 @@ async function createManifestMode() {
         // Start building the summary
         let summary = `<details>\n<summary>🐳 Container Manifest Summary (click to expand for details)</summary>\n\n`;
         summary += `## 📋 Manifest Configuration\n\n`;
+        summary += `| Container | Status |\n`;
+        summary += `|-----------|--------|\n`;
         // Process each container
         for (const [containerName, containerConfig] of Object.entries(config)) {
             coreExports.info(`\n🔄 Processing container: ${containerName}`);
