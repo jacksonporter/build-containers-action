@@ -26,7 +26,7 @@ async function processContainer(
   templateValues: TemplateValues
 ): Promise<string> {
   core.info(`\n📦 Starting manifest creation for container: ${containerName}`)
-  let summary = `### 📦 Container: ${containerName}\n\n`
+  let summary = `<details>\n<summary>📦 ${containerName}</summary>\n\n`
 
   const updatedTemplateValues = {
     ...templateValues,
@@ -103,7 +103,7 @@ async function processContainer(
 
   // Add registry login info to summary
   if (registryLogins.length > 0) {
-    summary += `#### 🔐 Registry Login\n\n`
+    summary += `### 🔐 Registry Login\n\n`
     summary += `| Status | Registry |\n`
     summary += `|--------|----------|\n`
     for (const registry of registryLogins) {
@@ -113,7 +113,7 @@ async function processContainer(
   }
 
   // Add manifest info to summary
-  summary += `#### 🏷️ Manifest Tags\n\n`
+  summary += `### 🏷️ Manifest Tags\n\n`
   summary += `| Tag |\n`
   summary += `|-----|\n`
   for (const tag of manifestTags) {
@@ -122,7 +122,7 @@ async function processContainer(
   summary += '\n'
 
   // Add platform info to summary
-  summary += `#### 💻 Included Platforms\n\n`
+  summary += `### 💻 Included Platforms\n\n`
   summary += `| Platform | Tag | Status |\n`
   summary += `|----------|-----|--------|\n`
   for (const buildOutput of buildOutputs) {
@@ -131,6 +131,8 @@ async function processContainer(
     summary += `| \`${platform}\` | \`${tag}\` | ✅ Included |\n`
   }
   summary += '\n'
+
+  summary += '</details>\n\n'
 
   // Create and push manifests
   core.info('🚀 Starting manifest creation and push')
