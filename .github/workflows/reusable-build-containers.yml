@@ -123,7 +123,10 @@ jobs:
         if: matrix.ci.scanWithTrivy == true
         uses: aquasecurity/trivy-action@0.31.0
         with:
-          image-ref: ${{ fromJson(steps.build-containers-action-build.outputs.build-output-json).buildInfo.primaryTag }}
+          image-ref:
+            ${{
+            fromJson(steps.build-containers-action-build.outputs.build-output-json).buildInfo.primaryTag
+            }}
 
       - name: Run post-build command
         if: inputs.post-build-command != ''

@@ -520,6 +520,11 @@ export function validateContainerConfig(
   containerConfig.default.target =
     containerConfig.default?.target || containerDefaults?.target || null
 
+  containerConfig.default.ci = validateCIConfig(
+    containerConfig.default?.ci || {},
+    containerDefaults?.ci || {}
+  )
+
   containerConfig.default.selectedBuildArgs =
     (containerConfig.default.selectedBuildArgs &&
     containerConfig.default.selectedBuildArgs.length > 0
