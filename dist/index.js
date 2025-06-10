@@ -9126,7 +9126,10 @@ async function processContainer(containerName, containerConfig, buildOutputs, te
     summary += `### 🏷️ Manifest Tags\n\n`;
     summary += `| Tag |\n|-----|\n`;
     for (const tag of manifestTags) {
-        summary += `| <code>${tag}</code> |\n`;
+        for (const repository of Object.values(repositories)) {
+            const fullManifestTag = `${repository.registry}/${repository.repository}:${tag}`;
+            summary += `| <code>${fullManifestTag}</code> |\n`;
+        }
     }
     summary += '\n';
     // Add platform info to summary (show full registry/tag for each platform)
